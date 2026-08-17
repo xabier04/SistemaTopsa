@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360" width="100%" height="100%">
+  <defs>
+    <!-- Filtros y estilos -->
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800&amp;family=Share+Tech+Mono&amp;family=Montserrat:wght@800&amp;display=swap');
+      
+      .brand-letter {
+        font-family: 'Cinzel', 'Times New Roman', 'Georgia', serif;
+        font-weight: 800;
+        font-size: 135px;
+        fill: #111827;
+      }
+      
+      .sub-text {
+        font-family: 'Share Tech Mono', 'Courier New', monospace;
+        font-size: 26px;
+        letter-spacing: 7px;
+        fill: #2d6635;
+        font-weight: bold;
+      }
+    </style>
+  </defs>
+
+  <!-- Fondo blanco limpio -->
+  <rect width="800" height="360" fill="#ffffff" rx="12"/>
+
+  <!-- Marco Exterior Verde y Negro con esquinas estilo Topografía / Plano -->
+  <!-- Borde exterior verde -->
+  <rect x="15" y="15" width="770" height="330" fill="none" stroke="#2d6635" stroke-width="4.5" rx="3"/>
+  
+  <!-- Esquinas técnicas tipo retícula topográfica -->
+  <!-- Superior Izquierda -->
+  <line x1="8" y1="8" x2="8" y2="75" stroke="#111827" stroke-width="5" stroke-linecap="square"/>
+  <line x1="8" y1="8" x2="75" y2="8" stroke="#111827" stroke-width="5" stroke-linecap="square"/>
+  
+  <!-- Superior Derecha -->
+  <line x1="792" y1="8" x2="792" y2="75" stroke="#111827" stroke-width="5" stroke-linecap="square"/>
+  <line x1="792" y1="8" x2="725" y2="8" stroke="#111827" stroke-width="5" stroke-linecap="square"/>
+  
+  <!-- Inferior Izquierda -->
+  <line x1="8" y1="352" x2="8" y2="285" stroke="#111827" stroke-width="5" stroke-linecap="square"/>
+  <line x1="8" y1="352" x2="75" y2="352" stroke="#111827" stroke-width="5" stroke-linecap="square"/>
+  
+  <!-- Inferior Derecha -->
+  <line x1="792" y1="352" x2="792" y2="285" stroke="#111827" stroke-width="5" stroke-linecap="square"/>
+  <line x1="792" y1="352" x2="725" y2="352" stroke="#111827" stroke-width="5" stroke-linecap="square"/>
+
+  <!-- ─── TEXTO PRINCIPAL "TOPSA" ─── -->
+
+  <!-- Letra T -->
+  <text x="105" y="215" class="brand-letter">T</text>
+
+  <!-- Letra O (Globo Terráqueo con Continente Americano) -->
+  <g transform="translate(290, 160)">
+    <!-- Océano Blanco -->
+    <circle cx="0" cy="0" r="70" fill="#ffffff" stroke="#111827" stroke-width="12"/>
+    
+    <!-- Clip path para el globo -->
+    <clipPath id="globeClip">
+      <circle cx="0" cy="0" r="64"/>
+    </clipPath>
+    
+    <!-- Continente Americano en Verde Topográfico -->
+    <g clip-path="url(#globeClip)">
+      <!-- Norteamérica -->
+      <path d="M -45,-55 
+               C -25,-60 -5,-55 10,-45 
+               C 20,-35 25,-20 15,-5 
+               C 5,5 -10,-5 -20,-10 
+               C -28,-15 -35,5 -25,20 
+               C -15,35 -20,45 -30,45 
+               C -40,45 -48,25 -42,5 
+               C -38,-10 -55,-25 -52,-40 
+               Z" 
+            fill="#2d6635" stroke="#111827" stroke-width="2"/>
+      
+      <!-- Centroamérica y Caribe -->
+      <path d="M -25,18 Q -15,28 -12,38 Q -8,45 -18,48 Q -24,38 -25,18 Z" 
+            fill="#2d6635" stroke="#111827" stroke-width="1.5"/>
+            
+      <!-- Sudamérica -->
+      <path d="M -18,42 
+               C -5,38 12,45 18,60 
+               C 22,72 10,95 -5,105 
+               C -15,110 -25,90 -22,75 
+               C -20,60 -25,50 -18,42 
+               Z" 
+            fill="#2d6635" stroke="#111827" stroke-width="2"/>
+
+      <!-- Islas / Groenlandia -->
+      <path d="M 5,-58 C 15,-62 30,-50 25,-40 C 18,-35 10,-45 5,-58 Z" 
+            fill="#2d6635" stroke="#111827" stroke-width="1.5"/>
+    </g>
+    
+    <!-- Anillo exterior reforzado de la O -->
+    <circle cx="0" cy="0" r="70" fill="none" stroke="#111827" stroke-width="12"/>
+  </g>
+
+  <!-- Letra P -->
+  <text x="375" y="215" class="brand-letter">P</text>
+
+  <!-- Letra S -->
+  <text x="495" y="215" class="brand-letter">S</text>
+
+  <!-- Letra A (Flecha / Brújula / Punto Cardinal Topográfico) -->
+  <g transform="translate(640, 160)">
+    <!-- Cuerpo de la Flecha Topográfica / Delta de Agrimensura -->
+    <!-- Triángulo / Ala izquierda en Amarillo Topográfico / Arena -->
+    <path d="M 35,-65 L -60,40 L -25,30 L 15,10 Z" 
+          fill="#f1cf63" stroke="#111827" stroke-width="9" stroke-linejoin="round"/>
+          
+    <!-- Ala derecha en Negro sólido -->
+    <path d="M 35,-65 L 15,10 L -25,30 L 55,60 Z" 
+          fill="#111827" stroke="#111827" stroke-width="9" stroke-linejoin="round"/>
+          
+    <!-- Relleno interior dorado de la flecha -->
+    <polygon points="30,-50 -40,32 -18,24 10,8" fill="#f1cf63"/>
+  </g>
+
+  <!-- ─── LÍNEA DIVISORIA ─── -->
+  <line x1="80" y1="245" x2="720" y2="245" stroke="#111827" stroke-width="3.5"/>
+
+  <!-- ─── SUBTÍTULO "TOPOGRAFIA Y SERVICIOS ANEXOS" ─── -->
+  <text x="400" y="278" text-anchor="middle" class="sub-text">TOPOGRAFIA Y SERVICIOS ANEXOS</text>
+
+</svg>

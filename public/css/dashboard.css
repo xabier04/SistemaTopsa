@@ -1,0 +1,247 @@
+/* ============================================================
+   Sistema TOPSA — Dashboard Styles
+   ============================================================ */
+
+/* ─── Stats Grid ──────────────────────────────────────────── */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--space-6);
+    margin-bottom: var(--space-8);
+}
+
+.stat-card {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-5);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-200);
+    transition: all var(--transition-base);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    opacity: 0.05;
+    transform: translate(30px, -30px);
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-300);
+}
+
+.stat-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.stat-icon.green, .stat-icon.blue {
+    background: linear-gradient(135deg, rgba(45, 102, 53, 0.15), rgba(45, 102, 53, 0.05));
+    color: var(--primary-500);
+    border: 1px solid rgba(45, 102, 53, 0.2);
+}
+
+.stat-icon.amber {
+    background: linear-gradient(135deg, rgba(241, 207, 99, 0.3), rgba(241, 207, 99, 0.1));
+    color: #92400e;
+    border: 1px solid rgba(241, 207, 99, 0.5);
+}
+
+.stat-icon.red {
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.12), rgba(220, 38, 38, 0.05));
+    color: var(--error-color);
+    border: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+.stat-icon.purple {
+    background: linear-gradient(135deg, rgba(37, 87, 44, 0.15), rgba(37, 87, 44, 0.05));
+    color: var(--primary-600);
+    border: 1px solid rgba(37, 87, 44, 0.2);
+}
+
+.stat-card::after {
+    background: currentColor;
+}
+
+.stat-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.stat-label {
+    font-size: var(--text-xs);
+    font-weight: 700;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: var(--space-1);
+}
+
+.stat-value {
+    font-family: var(--font-heading);
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    color: var(--gray-900);
+    line-height: 1.2;
+}
+
+.stat-change {
+    font-size: var(--text-xs);
+    font-weight: 500;
+    margin-top: var(--space-1);
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+/* ─── Dashboard Grid ─────────────────────────────────────── */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--space-6);
+}
+
+.dashboard-grid-full {
+    grid-column: 1 / -1;
+}
+
+/* ─── Recent Activity & Widgets ───────────────────────────── */
+.activity-list {
+    list-style: none;
+}
+
+.activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-4);
+    padding: var(--space-4) 0;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+.activity-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.activity-text {
+    font-size: var(--text-sm);
+    color: var(--gray-700);
+    margin-bottom: var(--space-1);
+}
+
+.activity-text strong {
+    color: var(--gray-900);
+}
+
+.activity-time {
+    font-size: var(--text-xs);
+    color: var(--gray-400);
+}
+
+/* ─── Project Status List ─────────────────────────────────── */
+.project-list {
+    list-style: none;
+}
+
+.project-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4) 0;
+    border-bottom: 1px solid var(--gray-200);
+    gap: var(--space-4);
+}
+
+.project-item:last-child {
+    border-bottom: none;
+}
+
+.project-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.project-name {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: var(--space-1);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.project-client {
+    font-size: var(--text-xs);
+    color: var(--gray-500);
+}
+
+/* ─── Progress Bar ────────────────────────────────────────── */
+.progress-bar {
+    height: 8px;
+    background: var(--gray-200);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-top: var(--space-2);
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: var(--radius-full);
+    background: linear-gradient(90deg, var(--primary-500), var(--primary-400));
+    transition: width var(--transition-slow);
+}
+
+.progress-fill.green  { background: linear-gradient(90deg, #166534, #22c55e); }
+.progress-fill.amber  { background: linear-gradient(90deg, #d97706, #facc15); }
+.progress-fill.red    { background: linear-gradient(90deg, #dc2626, #f87171); }
+
+/* ─── Responsive Dashboard ────────────────────────────────── */
+@media (max-width: 1024px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
