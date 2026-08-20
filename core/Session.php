@@ -30,7 +30,7 @@ class Session
             'domain'   => '',
             'secure'   => false, // Cambiar a true en producción con HTTPS
             'httponly'  => true,
-            'samesite'  => 'Strict',
+            'samesite'  => 'Lax',
         ]);
 
         session_name($config['session']['name']);

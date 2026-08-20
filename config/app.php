@@ -8,8 +8,27 @@
 return [
     'name'          => 'Sistema TOPSA',
     'version'       => '1.0.0',
-    'description'   => 'Sistema de Gestión — Oficina de Topografía y Servicios Anexos TOPSA',
-    'base_url'      => 'http://sistematopsa.test',
+    // URL base detectada dinámicamente según el entorno y dominio de acceso
+    'base_url' => (function () {
+        if (php_sapi_name() === 'cli' || empty($_SERVER['HTTP_HOST'])) {
+            return 'http://sistematopsa.test';
+        }
+        $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+        $protocol = $isHttps ? 'https://' : 'http://';
+        $host = $_SERVER['HTTP_HOST'];
+        
+        $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
+        $dir = str_replace('\\', '/', dirname($scriptName));
+        
+        if ($dir === '/' || $dir === '\\' || $dir === '.') {
+            $basePath = '';
+        } else {
+            $basePath = preg_replace('#/public$#', '', $dir);
+        }
+        
+        return rtrim($protocol . $host . $basePath, '/');
+    })(),
     'timezone'      => 'America/El_Salvador',
     'debug'         => true,
 

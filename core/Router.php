@@ -21,9 +21,20 @@ class Router
     {
         $url = $this->parseUrl();
 
-        $controllerName = !empty($url[0]) ? ucfirst($url[0]) . 'Controller' : $this->defaultController;
-        $action         = $url[1] ?? $this->defaultAction;
-        $params         = array_slice($url, 2);
+        if (empty($url)) {
+            if (Session::isAuthenticated()) {
+                $controllerName = 'DashboardController';
+                $action = 'index';
+            } else {
+                $controllerName = 'AuthController';
+                $action = 'login';
+            }
+        } else {
+            $controllerName = ucfirst($url[0]) . 'Controller';
+            $action         = $url[1] ?? 'index';
+        }
+
+        $params = !empty($url) ? array_slice($url, 2) : [];
 
         $controllerClass = $this->controllerNamespace . $controllerName;
 
