@@ -7,6 +7,17 @@
     </a>
 </div>
 
+<!-- Summary Chips -->
+<div class="summary-chips">
+    <div class="summary-chip">
+        <div class="chip-icon purple"><i class="fas fa-building"></i></div>
+        <div class="chip-data">
+            <span class="chip-value"><?= count($inmuebles ?? []) ?></span>
+            <span class="chip-label">Total Inmuebles</span>
+        </div>
+    </div>
+</div>
+
 <div class="card">
     <div class="table-container">
         <table class="table">
@@ -26,21 +37,29 @@
                     <?php foreach ($inmuebles as $i => $inm): ?>
                         <tr>
                             <td><?= $i + 1 ?></td>
-                            <td class="fw-600"><?= e($inm['matricula']) ?></td>
+                            <td class="fw-600"><span class="cell-icon-text"><i class="fas fa-hashtag"></i> <?= e($inm['matricula']) ?></span></td>
                             <td><?= e($inm['nombre_cliente'] ?? '—') ?></td>
-                            <td><?= truncate($inm['direccion'] ?? '', 40) ?></td>
+                            <td><span class="cell-icon-text"><i class="fas fa-map-marker-alt"></i> <?= truncate($inm['direccion'] ?? '', 40) ?></span></td>
                             <td><?= $inm['area'] ? number_format($inm['area'], 2) : '—' ?></td>
-                            <td><span class="badge badge-secondary"><?= e($inm['tipo_inmueble']) ?></span></td>
+                            <td><span class="badge-dot dot-neutral"><?= e($inm['tipo_inmueble']) ?></span></td>
                             <td>
                                 <div class="table-actions">
-                                    <a href="<?= url("inmueble/edit/{$inm['id_inmueble']}") ?>" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></a>
-                                    <button class="btn btn-sm btn-danger btn-delete" data-id="<?= $inm['id_inmueble'] ?>" data-name="<?= e($inm['matricula']) ?>"><i class="fas fa-trash"></i></button>
+                                    <a href="<?= url("inmueble/edit/{$inm['id_inmueble']}") ?>" class="btn-action act-edit" title="Editar"><i class="fas fa-edit"></i></a>
+                                    <button class="btn-action act-delete btn-delete" data-id="<?= $inm['id_inmueble'] ?>" data-name="<?= e($inm['matricula']) ?>" title="Eliminar"><i class="fas fa-trash"></i></button>
                                 </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
-                    <tr><td colspan="7"><div class="empty-state"><i class="fas fa-building"></i><h3>Sin inmuebles</h3></div></td></tr>
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <i class="fas fa-building"></i>
+                                <h3>Sin inmuebles</h3>
+                                <p>Registre su primer inmueble para comenzar</p>
+                            </div>
+                        </td>
+                    </tr>
                 <?php endif; ?>
             </tbody>
         </table>

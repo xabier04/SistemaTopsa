@@ -1,7 +1,7 @@
 <?php /** Vista: Detalle de Proyecto */ ?>
 
 <div class="page-header">
-    <h2><i class="fas fa-project-diagram"></i> <?= e($proyecto['nombre_del_proyecto']) ?></h2>
+    <h2><i class="fas fa-drafting-compass"></i> <?= e($proyecto['nombre_del_proyecto']) ?></h2>
     <div class="d-flex gap-3">
         <a href="<?= url("proyecto/edit/{$proyecto['id_proyecto']}") ?>" class="btn btn-warning">
             <i class="fas fa-edit"></i> Editar
@@ -17,9 +17,9 @@
     <div class="stat-card">
         <div class="stat-icon blue"><i class="fas fa-user-tie"></i></div>
         <div class="stat-content">
-            <span class="stat-label">Cliente</span>
+            <span class="stat-label">Cliente Titular</span>
             <span class="stat-value" style="font-size: var(--text-lg);"><?= e($proyecto['nombre_cliente']) ?></span>
-            <span class="text-xs text-muted"><?= e($proyecto['telefono_cliente'] ?? '') ?></span>
+            <span class="text-xs text-muted"><i class="fas fa-phone"></i> <?= e($proyecto['telefono_cliente'] ?? '—') ?></span>
         </div>
     </div>
     <div class="stat-card">
@@ -30,7 +30,7 @@
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon amber"><i class="fas fa-hand-holding-usd"></i></div>
+        <div class="stat-icon green"><i class="fas fa-hand-holding-usd"></i></div>
         <div class="stat-content">
             <span class="stat-label">Total Abonado</span>
             <span class="stat-value"><?= formatMoney($proyecto['total_abonado']) ?></span>
@@ -51,25 +51,30 @@
     <!-- ─── Empleados Asignados ─────────────────────────────── -->
     <div class="card">
         <div class="card-header">
-            <h3><i class="fas fa-users" style="color: var(--primary-500); margin-right: 8px;"></i>Empleados Asignados</h3>
+            <h3><i class="fas fa-users" style="color: var(--primary-500); margin-right: 8px;"></i>Equipo de Campo Asignado</h3>
         </div>
         <div class="card-body" style="padding: var(--space-4) var(--space-6);">
             <?php if (!empty($empleados)): ?>
                 <ul class="project-list">
                     <?php foreach ($empleados as $emp): ?>
                         <li class="project-item">
-                            <div class="project-info">
-                                <div class="project-name"><?= e($emp['nombre_completo']) ?></div>
-                                <div class="project-client"><?= e($emp['cargo'] ?? '') ?> — Asignado: <?= formatDate($emp['fecha_asignacion']) ?></div>
+                            <div class="cell-with-avatar" style="flex: 1;">
+                                <span class="avatar-sm green"><?= initials($emp['nombre_completo']) ?></span>
+                                <div class="project-info">
+                                    <div class="project-name"><?= e($emp['nombre_completo']) ?></div>
+                                    <div class="project-client"><?= e($emp['cargo'] ?? '') ?> — Asignado: <?= formatDate($emp['fecha_asignacion']) ?></div>
+                                </div>
                             </div>
-                            <span class="badge <?= estadoClass($emp['estado']) ?>"><?= e($emp['estado']) ?></span>
+                            <?php $dotClass = ($emp['estado'] === 'Activo') ? 'dot-success' : 'dot-danger'; ?>
+                            <span class="badge-dot <?= $dotClass ?>"><?= e($emp['estado']) ?></span>
                         </li>
                     <?php endforeach; ?>
                 </ul>
             <?php else: ?>
                 <div class="empty-state">
                     <i class="fas fa-user-plus"></i>
-                    <p>Sin empleados asignados</p>
+                    <h3>Sin personal asignado</h3>
+                    <p>No hay técnicos asignados a este proyecto</p>
                 </div>
             <?php endif; ?>
         </div>
@@ -78,9 +83,9 @@
     <!-- ─── Transacciones ───────────────────────────────────── -->
     <div class="card">
         <div class="card-header">
-            <h3><i class="fas fa-money-bill-wave" style="color: var(--success-color); margin-right: 8px;"></i>Transacciones</h3>
-            <a href="<?= url('transaccion/create') ?>" class="btn btn-sm btn-success">
-                <i class="fas fa-plus"></i> Nuevo
+            <h3><i class="fas fa-money-bill-wave" style="color: var(--primary-500); margin-right: 8px;"></i>Historial de Abonos</h3>
+            <a href="<?= url('transaccion/create') ?>" class="btn btn-sm btn-primary">
+                <i class="fas fa-plus"></i> Nuevo Abono
             </a>
         </div>
         <div class="card-body" style="padding: var(--space-4) var(--space-6);">
@@ -89,16 +94,18 @@
                     <?php foreach ($transacciones as $t): ?>
                         <li class="project-item">
                             <div class="project-info">
-                                <div class="project-name"><?= formatMoney($t['monto_abonado']) ?></div>
+                                <div class="project-name cell-money positive"><?= formatMoney($t['monto_abonado']) ?></div>
                                 <div class="project-client"><?= e($t['tipo_de_transaccion']) ?> — <?= formatDate($t['fecha_de_pago']) ?></div>
                             </div>
+                            <span class="badge-dot dot-neutral"><?= e($t['tipo_de_transaccion']) ?></span>
                         </li>
                     <?php endforeach; ?>
                 </ul>
             <?php else: ?>
                 <div class="empty-state">
                     <i class="fas fa-receipt"></i>
-                    <p>Sin transacciones</p>
+                    <h3>Sin transacciones</h3>
+                    <p>Aún no se registran pagos para este proyecto</p>
                 </div>
             <?php endif; ?>
         </div>
@@ -108,7 +115,7 @@
 <!-- ─── Valuaciones ─────────────────────────────────────────── -->
 <div class="card mt-6">
     <div class="card-header">
-        <h3><i class="fas fa-clipboard-check" style="color: var(--accent-500); margin-right: 8px;"></i>Valuaciones (Avalúos)</h3>
+        <h3><i class="fas fa-clipboard-check" style="color: var(--primary-500); margin-right: 8px;"></i>Valuaciones y Avance Pericial</h3>
     </div>
     <div class="card-body">
         <?php if (!empty($valuaciones)): ?>
@@ -118,21 +125,21 @@
                         <tr>
                             <th>Fecha</th>
                             <th>Monto Estimado</th>
-                            <th>Avance</th>
+                            <th>Avance Físico</th>
                             <th>Observaciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($valuaciones as $v): ?>
                             <tr>
-                                <td><?= formatDate($v['fecha_del_valuo']) ?></td>
-                                <td><?= formatMoney($v['monto_estimado']) ?></td>
+                                <td><span class="cell-icon-text"><i class="fas fa-calendar-alt"></i> <?= formatDate($v['fecha_del_valuo']) ?></span></td>
+                                <td><span class="cell-money"><?= formatMoney($v['monto_estimado']) ?></span></td>
                                 <td>
-                                    <div style="display: flex; align-items: center; gap: var(--space-3);">
-                                        <div class="progress-bar" style="flex: 1;">
+                                    <div class="progress-inline">
+                                        <div class="progress-bar">
                                             <div class="progress-fill green" style="width: <?= $v['porcentaje_de_avance'] ?>%"></div>
                                         </div>
-                                        <span class="text-sm fw-600"><?= formatPercent($v['porcentaje_de_avance']) ?></span>
+                                        <span class="progress-label"><?= formatPercent($v['porcentaje_de_avance']) ?></span>
                                     </div>
                                 </td>
                                 <td><?= e($v['observaciones'] ?? '—') ?></td>
@@ -144,7 +151,8 @@
         <?php else: ?>
             <div class="empty-state">
                 <i class="fas fa-clipboard-list"></i>
-                <p>Sin valuaciones registradas</p>
+                <h3>Sin valuaciones registradas</h3>
+                <p>No se han emitido dictámenes de avalúo para este proyecto</p>
             </div>
         <?php endif; ?>
     </div>
@@ -153,7 +161,7 @@
 <!-- ─── Documentos ──────────────────────────────────────────── -->
 <div class="card mt-6">
     <div class="card-header">
-        <h3><i class="fas fa-folder-open" style="color: var(--info-color); margin-right: 8px;"></i>Documentos</h3>
+        <h3><i class="fas fa-folder-open" style="color: var(--primary-500); margin-right: 8px;"></i>Planos y Documentos Adjuntos</h3>
     </div>
     <div class="card-body">
         <?php if (!empty($documentos)): ?>
@@ -164,17 +172,22 @@
                             <th>Archivo</th>
                             <th>Tipo</th>
                             <th>Fecha</th>
-                            <th>Descargar</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($documentos as $doc): ?>
                             <tr>
-                                <td class="fw-600"><?= e($doc['nombre_del_archivo']) ?></td>
-                                <td><span class="badge badge-secondary"><?= e($doc['tipo_de_documento']) ?></span></td>
-                                <td><?= formatDate($doc['fecha_de_subida']) ?></td>
+                                <td class="fw-600">
+                                    <div class="cell-with-avatar">
+                                        <span class="file-icon file-plan"><i class="fas fa-file-alt"></i></span>
+                                        <div class="cell-name"><?= e($doc['nombre_del_archivo']) ?></div>
+                                    </div>
+                                </td>
+                                <td><span class="badge-dot dot-neutral"><?= e($doc['tipo_de_documento']) ?></span></td>
+                                <td><span class="cell-icon-text"><i class="fas fa-calendar-alt"></i> <?= formatDate($doc['fecha_de_subida']) ?></span></td>
                                 <td>
-                                    <a href="<?= url("documento/download/{$doc['id_documento']}") ?>" class="btn btn-sm btn-outline">
+                                    <a href="<?= url("documento/download/{$doc['id_documento']}") ?>" class="btn-action act-download" title="Descargar">
                                         <i class="fas fa-download"></i>
                                     </a>
                                 </td>
@@ -186,7 +199,8 @@
         <?php else: ?>
             <div class="empty-state">
                 <i class="fas fa-file-upload"></i>
-                <p>Sin documentos adjuntos</p>
+                <h3>Sin documentos adjuntos</h3>
+                <p>No hay planos ni archivos vinculados a este proyecto</p>
             </div>
         <?php endif; ?>
     </div>

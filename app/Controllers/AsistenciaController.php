@@ -23,15 +23,28 @@ class AsistenciaController extends Controller
     public function index(): void
     {
         $fecha = $_GET['fecha'] ?? date('Y-m-d');
-        $asistencias = $this->model->allWithEmpleado($fecha);
-        $empleados = (new Empleado())->activos();
+        $user = Session::getUser();
+        $isAdmin = Session::isAdmin();
+
+        if ($isAdmin) {
+            $asistencias = $this->model->allWithEmpleado($fecha);
+            $empleados = (new Empleado())->activos();
+            $currentEmpleado = null;
+        } else {
+            $idEmpleado = (int) ($user['id_empleado'] ?? 0);
+            $asistencias = $this->model->allWithEmpleado($fecha, $idEmpleado);
+            $empleados = [];
+            $currentEmpleado = (new Empleado())->find($idEmpleado);
+        }
 
         $this->view('asistencias/index', [
-            'pageTitle'    => 'Control de Asistencia',
-            'pageScript'   => 'asistencias',
-            'asistencias'  => $asistencias,
-            'empleados'    => $empleados,
-            'fechaFiltro'  => $fecha,
+            'pageTitle'         => 'Control de Asistencia',
+            'pageScript'        => 'asistencias',
+            'asistencias'       => $asistencias,
+            'empleados'         => $empleados,
+            'fechaFiltro'       => $fecha,
+            'isAdmin'           => $isAdmin,
+            'currentEmpleado'   => $currentEmpleado,
         ]);
     }
 
@@ -40,15 +53,20 @@ class AsistenciaController extends Controller
      */
     public function marcarEntrada(): void
     {
-        if (!$this->isPost()) {
+        if (!$this->isPost() || !$this->validateCsrf()) {
             $this->redirect('asistencia/index');
             return;
         }
 
-        $idEmpleado = (int) $this->input('id_empleado', 0);
+        $user = Session::getUser();
+        if (Session::isAdmin()) {
+            $idEmpleado = (int) $this->input('id_empleado', 0);
+        } else {
+            $idEmpleado = (int) ($user['id_empleado'] ?? 0);
+        }
 
         if ($idEmpleado === 0) {
-            Session::flash('error', 'Seleccione un empleado.');
+            Session::flash('error', 'No se ha podido identificar al empleado.');
             $this->redirect('asistencia/index');
             return;
         }
@@ -56,7 +74,7 @@ class AsistenciaController extends Controller
         // Verificar si ya marcó hoy
         $marca = $this->model->getMarcaHoy($idEmpleado);
         if ($marca) {
-            Session::flash('warning', 'El empleado ya tiene marca de entrada para hoy.');
+            Session::flash('warning', 'Ya existe marca de entrada para el día de hoy.');
             $this->redirect('asistencia/index');
             return;
         }
@@ -77,12 +95,24 @@ class AsistenciaController extends Controller
      */
     public function marcarSalida(): void
     {
-        if (!$this->isPost()) {
+        if (!$this->isPost() || !$this->validateCsrf()) {
             $this->redirect('asistencia/index');
             return;
         }
 
-        $idEmpleado = (int) $this->input('id_empleado', 0);
+        $user = Session::getUser();
+        if (Session::isAdmin()) {
+            $idEmpleado = (int) $this->input('id_empleado', 0);
+        } else {
+            $idEmpleado = (int) ($user['id_empleado'] ?? 0);
+        }
+
+        if ($idEmpleado === 0) {
+            Session::flash('error', 'No se ha podido identificar al empleado.');
+            $this->redirect('asistencia/index');
+            return;
+        }
+
         $marca = $this->model->getMarcaHoy($idEmpleado);
 
         if (!$marca) {
@@ -104,7 +134,7 @@ class AsistenciaController extends Controller
         $horas   = $diff->h + ($diff->i / 60);
 
         $this->model->update($marca['id_asistencia'], [
-            'hora_de_salida'  => $horaSalida,
+            'hora_de_salida'   => $horaSalida,
             'horas_trabajadas' => round($horas, 2),
         ]);
 
@@ -118,11 +148,19 @@ class AsistenciaController extends Controller
      */
     public function consolidado(): void
     {
-        $idEmpleado = (int) ($_GET['id_empleado'] ?? 0);
+        $user = Session::getUser();
+        $isAdmin = Session::isAdmin();
         $mes  = (int) ($_GET['mes'] ?? date('m'));
         $anio = (int) ($_GET['anio'] ?? date('Y'));
 
-        $empleados = (new Empleado())->activos();
+        if ($isAdmin) {
+            $idEmpleado = (int) ($_GET['id_empleado'] ?? 0);
+            $empleados = (new Empleado())->activos();
+        } else {
+            $idEmpleado = (int) ($user['id_empleado'] ?? 0);
+            $empleados = [];
+        }
+
         $registros = [];
         $totalHoras = 0;
         $empleadoSeleccionado = null;
@@ -134,15 +172,16 @@ class AsistenciaController extends Controller
         }
 
         $this->view('asistencias/consolidado', [
-            'pageTitle'    => 'Consolidado de Asistencia',
-            'pageScript'   => 'asistencias',
-            'empleados'    => $empleados,
-            'registros'    => $registros,
-            'totalHoras'   => $totalHoras,
-            'mesActual'    => $mes,
-            'anioActual'   => $anio,
-            'idEmpleado'   => $idEmpleado,
+            'pageTitle'            => 'Consolidado de Asistencia',
+            'pageScript'           => 'asistencias',
+            'empleados'            => $empleados,
+            'registros'            => $registros,
+            'totalHoras'           => $totalHoras,
+            'mesActual'            => $mes,
+            'anioActual'           => $anio,
+            'idEmpleado'           => $idEmpleado,
             'empleadoSeleccionado' => $empleadoSeleccionado,
+            'isAdmin'              => $isAdmin,
         ]);
     }
 }

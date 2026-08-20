@@ -53,28 +53,29 @@
     flex-shrink: 0;
 }
 
-.stat-icon.green, .stat-icon.blue {
-    background: linear-gradient(135deg, rgba(45, 102, 53, 0.15), rgba(45, 102, 53, 0.05));
+.stat-icon.green,
+.stat-icon.blue {
+    background: rgba(45, 102, 53, 0.1);
     color: var(--primary-500);
-    border: 1px solid rgba(45, 102, 53, 0.2);
+    border: 1px solid rgba(45, 102, 53, 0.15);
 }
 
 .stat-icon.amber {
-    background: linear-gradient(135deg, rgba(241, 207, 99, 0.3), rgba(241, 207, 99, 0.1));
+    background: rgba(241, 207, 99, 0.15);
     color: #92400e;
-    border: 1px solid rgba(241, 207, 99, 0.5);
+    border: 1px solid rgba(241, 207, 99, 0.3);
 }
 
 .stat-icon.red {
-    background: linear-gradient(135deg, rgba(220, 38, 38, 0.12), rgba(220, 38, 38, 0.05));
+    background: rgba(220, 38, 38, 0.08);
     color: var(--error-color);
-    border: 1px solid rgba(220, 38, 38, 0.2);
+    border: 1px solid rgba(220, 38, 38, 0.15);
 }
 
 .stat-icon.purple {
-    background: linear-gradient(135deg, rgba(37, 87, 44, 0.15), rgba(37, 87, 44, 0.05));
+    background: rgba(37, 87, 44, 0.1);
     color: var(--primary-600);
-    border: 1px solid rgba(37, 87, 44, 0.2);
+    border: 1px solid rgba(37, 87, 44, 0.15);
 }
 
 .stat-card::after {
@@ -221,13 +222,21 @@
 .progress-fill {
     height: 100%;
     border-radius: var(--radius-full);
-    background: linear-gradient(90deg, var(--primary-500), var(--primary-400));
+    background: var(--primary-500);
     transition: width var(--transition-slow);
 }
 
-.progress-fill.green  { background: linear-gradient(90deg, #166534, #22c55e); }
-.progress-fill.amber  { background: linear-gradient(90deg, #d97706, #facc15); }
-.progress-fill.red    { background: linear-gradient(90deg, #dc2626, #f87171); }
+.progress-fill.green {
+    background: #166534;
+}
+
+.progress-fill.amber {
+    background: #d97706;
+}
+
+.progress-fill.red {
+    background: #dc2626;
+}
 
 /* ─── Responsive Dashboard ────────────────────────────────── */
 @media (max-width: 1024px) {

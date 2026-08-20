@@ -76,7 +76,7 @@ $finalizados = $estadosMap['Finalizado'] ?? 0;
                                 <div class="project-name"><?= e($proy['nombre_del_proyecto']) ?></div>
                                 <div class="project-client"><?= e($proy['nombre_cliente']) ?> — <?= formatDate($proy['fecha_de_inicio']) ?></div>
                             </div>
-                            <span class="badge <?= estadoClass($proy['estado_del_proyecto']) ?>">
+                            <span class="badge-dot <?= estadoDotClass($proy['estado_del_proyecto']) ?>">
                                 <?= e($proy['estado_del_proyecto']) ?>
                             </span>
                         </li>

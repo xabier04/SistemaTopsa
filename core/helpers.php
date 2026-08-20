@@ -102,6 +102,20 @@ function estadoClass(string $estado): string
 }
 
 /**
+ * Obtener la clase dot CSS para un estado
+ */
+function estadoDotClass(string $estado): string
+{
+    return match (strtolower($estado)) {
+        'en proceso', 'en_proceso' => 'dot-warning',
+        'incompleto'               => 'dot-danger',
+        'finalizado', 'activo'     => 'dot-success',
+        'inactivo', 'bloqueado'    => 'dot-danger',
+        default                    => 'dot-neutral',
+    };
+}
+
+/**
  * Verificar si la ruta actual coincide (para active state del sidebar)
  */
 function isActiveRoute(string $route): string

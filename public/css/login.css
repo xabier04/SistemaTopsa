@@ -5,7 +5,7 @@
 
 .login-body {
     min-height: 100vh;
-    background: linear-gradient(135deg, #0f2412 0%, #16361b 50%, #1d4623 100%);
+    background: #0f2412;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -14,20 +14,7 @@
     overflow-x: hidden;
 }
 
-/* Retícula topográfica sutil de fondo */
-.login-body::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: 
-        linear-gradient(rgba(241, 207, 99, 0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(241, 207, 99, 0.04) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-}
+
 
 .login-container {
     display: flex;
@@ -46,7 +33,7 @@
 /* ─── Left Panel (Branding) ───────────────────────────────── */
 .login-left {
     flex: 1.1;
-    background: linear-gradient(160deg, #0f2412 0%, #16361b 55%, #25572c 100%);
+    background: #122d16;
     padding: var(--space-10) var(--space-8);
     display: flex;
     flex-direction: column;
@@ -62,7 +49,7 @@
     position: absolute;
     width: 320px;
     height: 320px;
-    background: radial-gradient(circle, rgba(241, 207, 99, 0.12) 0%, transparent 70%);
+    background: rgba(241, 207, 99, 0.06);
     border-radius: 50%;
     top: -80px;
     right: -80px;
@@ -73,7 +60,7 @@
     position: absolute;
     width: 220px;
     height: 220px;
-    background: radial-gradient(circle, rgba(84, 169, 92, 0.15) 0%, transparent 70%);
+    background: rgba(84, 169, 92, 0.08);
     border-radius: 50%;
     bottom: -60px;
     left: -60px;
@@ -249,12 +236,12 @@
     font-size: var(--text-base);
     margin-top: var(--space-4);
     border-radius: var(--radius-md);
-    background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-800) 100%);
+    background: var(--primary-600);
     box-shadow: 0 4px 14px rgba(29, 70, 35, 0.35);
 }
 
 .login-form .btn-primary:hover {
-    background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
+    background: var(--primary-500);
 }
 
 /* ─── Login Footer ────────────────────────────────────────── */

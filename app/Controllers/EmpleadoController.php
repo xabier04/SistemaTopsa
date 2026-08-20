@@ -20,6 +20,14 @@ class EmpleadoController extends Controller
         $this->model = new Empleado();
     }
 
+    public function getRequiredRole(string $action): ?string
+    {
+        if (in_array($action, ['create', 'store', 'edit', 'update', 'delete'])) {
+            return 'Administrador';
+        }
+        return null;
+    }
+
     public function index(): void
     {
         if (\Core\Router::isAjax()) {

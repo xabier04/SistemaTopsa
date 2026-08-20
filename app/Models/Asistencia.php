@@ -13,18 +13,28 @@ class Asistencia extends Model
     protected string $primaryKey = 'id_asistencia';
 
     /**
-     * Obtener asistencias con datos del empleado
+     * Obtener asistencias con datos del empleado (opcionalmente filtrado por empleado)
      */
-    public function allWithEmpleado(string $fecha = ''): array
+    public function allWithEmpleado(string $fecha = '', ?int $idEmpleado = null): array
     {
         $sql = "SELECT a.*, e.nombre_completo, e.cargo
                 FROM asistencias a
                 LEFT JOIN empleados e ON a.id_empleado = e.id_empleado";
         $params = [];
+        $where = [];
 
         if (!empty($fecha)) {
-            $sql .= " WHERE a.fecha_de_marcaje = :fecha";
+            $where[] = "a.fecha_de_marcaje = :fecha";
             $params[':fecha'] = $fecha;
+        }
+
+        if ($idEmpleado !== null && $idEmpleado > 0) {
+            $where[] = "a.id_empleado = :id_empleado";
+            $params[':id_empleado'] = $idEmpleado;
+        }
+
+        if (!empty($where)) {
+            $sql .= " WHERE " . implode(" AND ", $where);
         }
 
         $sql .= " ORDER BY a.fecha_de_marcaje DESC, a.hora_de_entrada ASC";
