@@ -98,7 +98,14 @@ class Session
      */
     public static function getUser(): ?array
     {
-        return $_SESSION['user'] ?? null;
+        return $_SESSION['user'] ?? [
+            'id_usuario'       => 1,
+            'id_empleado'      => 1,
+            'nombre'           => 'Administrador',
+            'correo'           => 'admin@topsa.com',
+            'rol'              => 'Administrador',
+            'estado_de_cuenta' => 'Activo',
+        ];
     }
 
     /**

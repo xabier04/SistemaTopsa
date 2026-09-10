@@ -31,7 +31,7 @@ class DocumentoController extends Controller
         }
 
         $documentos = $this->model->allWithProyecto();
-        $proyectos  = (new Proyecto())->all('nombre_del_proyecto', 'ASC');
+        $proyectos  = (new Proyecto())->allWithRelations();
 
         $this->view('documentos/index', [
             'pageTitle'  => 'Gestión Documental',

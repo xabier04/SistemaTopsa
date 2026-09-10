@@ -1,17 +1,18 @@
 -- ============================================================
 -- Sistema TOPSA — Esquema de Base de Datos
 -- Oficina de Ingeniería Civil "TOPSA"
+-- Sprint Backlog: Clientes, Inmuebles, Proyectos
 -- ============================================================
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ─── Crear base de datos ─────────────────────────────────────
-CREATE DATABASE IF NOT EXISTS `topsa_db`
+CREATE DATABASE IF NOT EXISTS `topsa1`
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
-USE `topsa_db`;
+USE `topsa1`;
 
 -- ─── Tabla: empleados ────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `empleados` (
@@ -32,6 +33,7 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
   `nombre` VARCHAR(60) NOT NULL,
   `correo` VARCHAR(50) NOT NULL,
   `contrasena` VARCHAR(255) NOT NULL,
+  `requiere_cambio_contrasena` TINYINT(1) NOT NULL DEFAULT 0,
   `rol` VARCHAR(30) NOT NULL DEFAULT 'Empleado',
   `estado_de_cuenta` VARCHAR(20) NOT NULL DEFAULT 'Activo',
   PRIMARY KEY (`id_usuario`),
@@ -58,6 +60,9 @@ CREATE TABLE IF NOT EXISTS `inmuebles` (
   `id_cliente` INT NOT NULL,
   `matricula` VARCHAR(30) NOT NULL,
   `direccion` TEXT NOT NULL,
+  `departamento` VARCHAR(100) DEFAULT NULL,
+  `municipio` VARCHAR(100) DEFAULT NULL,
+  `distrito` VARCHAR(100) DEFAULT NULL,
   `area` DECIMAL(10,2) DEFAULT NULL,
   `tipo_inmueble` VARCHAR(30) NOT NULL,
   PRIMARY KEY (`id_inmueble`),
@@ -91,58 +96,6 @@ CREATE TABLE IF NOT EXISTS `proyecto_empleado` (
   KEY `fk_pe_proyecto` (`id_proyecto`),
   CONSTRAINT `fk_pe_empleado` FOREIGN KEY (`id_empleado`) REFERENCES `empleados` (`id_empleado`) ON UPDATE CASCADE,
   CONSTRAINT `fk_pe_proyecto` FOREIGN KEY (`id_proyecto`) REFERENCES `proyectos` (`id_proyecto`) ON UPDATE CASCADE ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ─── Tabla: transacciones ────────────────────────────────────
-CREATE TABLE IF NOT EXISTS `transacciones` (
-  `id_transaccion` INT NOT NULL AUTO_INCREMENT,
-  `id_proyecto` INT NOT NULL,
-  `fecha_de_pago` DATE NOT NULL,
-  `monto_abonado` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-  `tipo_de_transaccion` VARCHAR(30) NOT NULL,
-  `saldo_pendiente` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-  PRIMARY KEY (`id_transaccion`),
-  KEY `fk_transacciones_proyecto` (`id_proyecto`),
-  CONSTRAINT `fk_transacciones_proyecto` FOREIGN KEY (`id_proyecto`) REFERENCES `proyectos` (`id_proyecto`) ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ─── Tabla: valuos (avalúos) ─────────────────────────────────
-CREATE TABLE IF NOT EXISTS `valuos` (
-  `id_valuo` INT NOT NULL AUTO_INCREMENT,
-  `id_proyecto` INT NOT NULL,
-  `fecha_del_valuo` DATE NOT NULL,
-  `monto_estimado` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-  `porcentaje_de_avance` DECIMAL(5,2) NOT NULL DEFAULT 0.00,
-  `observaciones` TEXT DEFAULT NULL,
-  PRIMARY KEY (`id_valuo`),
-  KEY `fk_valuos_proyecto` (`id_proyecto`),
-  CONSTRAINT `fk_valuos_proyecto` FOREIGN KEY (`id_proyecto`) REFERENCES `proyectos` (`id_proyecto`) ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ─── Tabla: documentos ───────────────────────────────────────
-CREATE TABLE IF NOT EXISTS `documentos` (
-  `id_documento` INT NOT NULL AUTO_INCREMENT,
-  `id_proyecto` INT NOT NULL,
-  `nombre_del_archivo` VARCHAR(60) NOT NULL,
-  `tipo_de_documento` VARCHAR(30) NOT NULL,
-  `fecha_de_subida` DATE NOT NULL,
-  `ruta_del_archivo` VARCHAR(255) NOT NULL,
-  PRIMARY KEY (`id_documento`),
-  KEY `fk_documentos_proyecto` (`id_proyecto`),
-  CONSTRAINT `fk_documentos_proyecto` FOREIGN KEY (`id_proyecto`) REFERENCES `proyectos` (`id_proyecto`) ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ─── Tabla: asistencias ──────────────────────────────────────
-CREATE TABLE IF NOT EXISTS `asistencias` (
-  `id_asistencia` INT NOT NULL AUTO_INCREMENT,
-  `id_empleado` INT NOT NULL,
-  `fecha_de_marcaje` DATE NOT NULL,
-  `hora_de_entrada` TIME DEFAULT NULL,
-  `hora_de_salida` TIME DEFAULT NULL,
-  `horas_trabajadas` DECIMAL(4,2) DEFAULT NULL,
-  PRIMARY KEY (`id_asistencia`),
-  KEY `fk_asistencias_empleado` (`id_empleado`),
-  CONSTRAINT `fk_asistencias_empleado` FOREIGN KEY (`id_empleado`) REFERENCES `empleados` (`id_empleado`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ─── Tabla: bitacora (actividad del sistema) ─────────────────
@@ -179,8 +132,44 @@ VALUES (
 
 SET FOREIGN_KEY_CHECKS = 1;
 
+-- Migración aditiva para la base local y nuevas instalaciones. No modifica datos existentes.
+CREATE TABLE IF NOT EXISTS valuos (
+  id_valuo INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  id_proyecto INT NOT NULL,
+  fecha_del_valuo DATE NOT NULL,
+  monto_estimado DECIMAL(14,2) NOT NULL DEFAULT 0,
+  porcentaje_de_avance DECIMAL(5,2) NOT NULL DEFAULT 0,
+  observaciones TEXT NULL,
+  KEY idx_valuo_proyecto (id_proyecto),
+  CONSTRAINT fk_valuo_proyecto FOREIGN KEY (id_proyecto) REFERENCES proyectos (id_proyecto) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS valuo_expedientes (
+  id_valuo INT NOT NULL PRIMARY KEY,
+  referencia VARCHAR(100) NOT NULL,
+  estado VARCHAR(20) NOT NULL DEFAULT 'Borrador',
+  version_calculo VARCHAR(40) NOT NULL,
+  datos JSON NOT NULL,
+  resultados JSON NOT NULL,
+  revision INT NOT NULL DEFAULT 1,
+  creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  actualizado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_expediente_valuo FOREIGN KEY (id_valuo) REFERENCES valuos (id_valuo) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS valuo_anexos (
+  id_anexo INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  id_valuo INT NOT NULL,
+  nombre VARCHAR(255) NOT NULL,
+  archivo VARCHAR(80) NOT NULL,
+  tipo VARCHAR(80) NOT NULL,
+  descripcion VARCHAR(255) NOT NULL,
+  creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_anexo_valuo FOREIGN KEY (id_valuo) REFERENCES valuos (id_valuo) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ============================================================
 -- Usuario de prueba:
 --   Correo:     admin@topsa.com
---   Contraseña: Admin123!
+--   Contraseña: password  (o Admin123!)
 -- ============================================================

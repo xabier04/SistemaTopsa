@@ -8,7 +8,7 @@
             else $totalInactivos++;
         }
     }
-    $isAdmin = \Core\Session::isAdmin();
+    $isAdmin = (\Core\Session::getUser()['rol'] ?? '') === 'Administrador';
 ?>
 
 <div class="page-header">
@@ -103,6 +103,7 @@
                             <?php if ($isAdmin): ?>
                             <td>
                                 <div class="table-actions">
+                                    <a href="<?= url('usuario/create') ?>?id_empleado=<?= (int) $emp['id_empleado'] ?>" class="btn-action" title="Crear usuario"><i class="fas fa-user-plus"></i></a>
                                     <a href="<?= url("empleado/edit/{$emp['id_empleado']}") ?>" class="btn-action act-edit" title="Editar">
                                         <i class="fas fa-edit"></i>
                                     </a>

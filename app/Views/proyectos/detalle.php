@@ -1,4 +1,4 @@
-<?php /** Vista: Detalle de Proyecto */ ?>
+<?php /** Vista: Detalle de Proyecto — Sprint Backlog */ ?>
 
 <div class="page-header">
     <h2><i class="fas fa-drafting-compass"></i> <?= e($proyecto['nombre_del_proyecto']) ?></h2>
@@ -30,177 +30,88 @@
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon green"><i class="fas fa-hand-holding-usd"></i></div>
+        <div class="stat-icon purple"><i class="fas fa-calendar-alt"></i></div>
         <div class="stat-content">
-            <span class="stat-label">Total Abonado</span>
-            <span class="stat-value"><?= formatMoney($proyecto['total_abonado']) ?></span>
+            <span class="stat-label">Fecha de Inicio</span>
+            <span class="stat-value" style="font-size: var(--text-lg);"><?= formatDate($proyecto['fecha_de_inicio']) ?></span>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon <?= ($proyecto['saldo_pendiente'] ?? 0) > 0 ? 'red' : 'green' ?>">
-            <i class="fas fa-balance-scale"></i>
+        <?php
+            $iconColor = match($proyecto['estado_del_proyecto'] ?? '') {
+                'Finalizado', 'Aprobado' => 'green',
+                'Incompleto'             => 'red',
+                default                  => 'amber',
+            };
+        ?>
+        <div class="stat-icon <?= $iconColor ?>">
+            <i class="fas fa-tasks"></i>
         </div>
         <div class="stat-content">
-            <span class="stat-label">Saldo Pendiente</span>
-            <span class="stat-value"><?= formatMoney($proyecto['saldo_pendiente']) ?></span>
+            <span class="stat-label">Estado</span>
+            <span class="badge-dot <?= estadoDotClass($proyecto['estado_del_proyecto']) ?>">
+                <?= e($proyecto['estado_del_proyecto']) ?>
+            </span>
         </div>
     </div>
 </div>
 
-<div class="dashboard-grid">
-    <!-- ─── Empleados Asignados ─────────────────────────────── -->
-    <div class="card">
-        <div class="card-header">
-            <h3><i class="fas fa-users" style="color: var(--primary-500); margin-right: 8px;"></i>Equipo de Campo Asignado</h3>
-        </div>
-        <div class="card-body" style="padding: var(--space-4) var(--space-6);">
-            <?php if (!empty($empleados)): ?>
-                <ul class="project-list">
-                    <?php foreach ($empleados as $emp): ?>
-                        <li class="project-item">
-                            <div class="cell-with-avatar" style="flex: 1;">
-                                <span class="avatar-sm green"><?= initials($emp['nombre_completo']) ?></span>
-                                <div class="project-info">
-                                    <div class="project-name"><?= e($emp['nombre_completo']) ?></div>
-                                    <div class="project-client"><?= e($emp['cargo'] ?? '') ?> — Asignado: <?= formatDate($emp['fecha_asignacion']) ?></div>
-                                </div>
-                            </div>
-                            <?php $dotClass = ($emp['estado'] === 'Activo') ? 'dot-success' : 'dot-danger'; ?>
-                            <span class="badge-dot <?= $dotClass ?>"><?= e($emp['estado']) ?></span>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
-            <?php else: ?>
-                <div class="empty-state">
-                    <i class="fas fa-user-plus"></i>
-                    <h3>Sin personal asignado</h3>
-                    <p>No hay técnicos asignados a este proyecto</p>
-                </div>
-            <?php endif; ?>
+<!-- ─── Información del Inmueble ─────────────────────────── -->
+<?php if (!empty($proyecto['matricula'])): ?>
+<div class="card mt-6" style="margin-bottom: var(--space-6);">
+    <div class="card-header">
+        <h3><i class="fas fa-map-marked-alt" style="color: var(--accent-500); margin-right: 8px;"></i>Inmueble Asociado</h3>
+    </div>
+    <div class="card-body">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-4);">
+            <div>
+                <span class="text-xs text-muted">Matrícula</span>
+                <div class="fw-600"><?= e($proyecto['matricula']) ?></div>
+            </div>
+            <div>
+                <span class="text-xs text-muted">Dirección</span>
+                <div class="fw-600"><?= e($proyecto['direccion_inmueble'] ?? '—') ?></div>
+            </div>
+            <div>
+                <span class="text-xs text-muted">Tipo</span>
+                <div class="fw-600"><?= e($proyecto['tipo_inmueble'] ?? '—') ?></div>
+            </div>
+            <div>
+                <span class="text-xs text-muted">Área</span>
+                <div class="fw-600"><?= e($proyecto['area'] ?? '—') ?> m²</div>
+            </div>
         </div>
     </div>
+</div>
+<?php endif; ?>
 
-    <!-- ─── Transacciones ───────────────────────────────────── -->
-    <div class="card">
-        <div class="card-header">
-            <h3><i class="fas fa-money-bill-wave" style="color: var(--primary-500); margin-right: 8px;"></i>Historial de Abonos</h3>
-            <a href="<?= url('transaccion/create') ?>" class="btn btn-sm btn-primary">
-                <i class="fas fa-plus"></i> Nuevo Abono
-            </a>
-        </div>
-        <div class="card-body" style="padding: var(--space-4) var(--space-6);">
-            <?php if (!empty($transacciones)): ?>
-                <ul class="project-list">
-                    <?php foreach ($transacciones as $t): ?>
-                        <li class="project-item">
+<!-- ─── Empleados Asignados ─────────────────────────────── -->
+<div class="card">
+    <div class="card-header">
+        <h3><i class="fas fa-users" style="color: var(--primary-500); margin-right: 8px;"></i>Equipo de Campo Asignado</h3>
+    </div>
+    <div class="card-body" style="padding: var(--space-4) var(--space-6);">
+        <?php if (!empty($empleados)): ?>
+            <ul class="project-list">
+                <?php foreach ($empleados as $emp): ?>
+                    <li class="project-item">
+                        <div class="cell-with-avatar" style="flex: 1;">
+                            <span class="avatar-sm green"><?= initials($emp['nombre_completo']) ?></span>
                             <div class="project-info">
-                                <div class="project-name cell-money positive"><?= formatMoney($t['monto_abonado']) ?></div>
-                                <div class="project-client"><?= e($t['tipo_de_transaccion']) ?> — <?= formatDate($t['fecha_de_pago']) ?></div>
+                                <div class="project-name"><?= e($emp['nombre_completo']) ?></div>
+                                <div class="project-client"><?= e($emp['cargo'] ?? '') ?> — Asignado: <?= formatDate($emp['fecha_asignacion']) ?></div>
                             </div>
-                            <span class="badge-dot dot-neutral"><?= e($t['tipo_de_transaccion']) ?></span>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
-            <?php else: ?>
-                <div class="empty-state">
-                    <i class="fas fa-receipt"></i>
-                    <h3>Sin transacciones</h3>
-                    <p>Aún no se registran pagos para este proyecto</p>
-                </div>
-            <?php endif; ?>
-        </div>
-    </div>
-</div>
-
-<!-- ─── Valuaciones ─────────────────────────────────────────── -->
-<div class="card mt-6">
-    <div class="card-header">
-        <h3><i class="fas fa-clipboard-check" style="color: var(--primary-500); margin-right: 8px;"></i>Valuaciones y Avance Pericial</h3>
-    </div>
-    <div class="card-body">
-        <?php if (!empty($valuaciones)): ?>
-            <div class="table-container">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Monto Estimado</th>
-                            <th>Avance Físico</th>
-                            <th>Observaciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($valuaciones as $v): ?>
-                            <tr>
-                                <td><span class="cell-icon-text"><i class="fas fa-calendar-alt"></i> <?= formatDate($v['fecha_del_valuo']) ?></span></td>
-                                <td><span class="cell-money"><?= formatMoney($v['monto_estimado']) ?></span></td>
-                                <td>
-                                    <div class="progress-inline">
-                                        <div class="progress-bar">
-                                            <div class="progress-fill green" style="width: <?= $v['porcentaje_de_avance'] ?>%"></div>
-                                        </div>
-                                        <span class="progress-label"><?= formatPercent($v['porcentaje_de_avance']) ?></span>
-                                    </div>
-                                </td>
-                                <td><?= e($v['observaciones'] ?? '—') ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
+                        </div>
+                        <?php $dotClass = ($emp['estado'] === 'Activo') ? 'dot-success' : 'dot-danger'; ?>
+                        <span class="badge-dot <?= $dotClass ?>"><?= e($emp['estado']) ?></span>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
         <?php else: ?>
             <div class="empty-state">
-                <i class="fas fa-clipboard-list"></i>
-                <h3>Sin valuaciones registradas</h3>
-                <p>No se han emitido dictámenes de avalúo para este proyecto</p>
-            </div>
-        <?php endif; ?>
-    </div>
-</div>
-
-<!-- ─── Documentos ──────────────────────────────────────────── -->
-<div class="card mt-6">
-    <div class="card-header">
-        <h3><i class="fas fa-folder-open" style="color: var(--primary-500); margin-right: 8px;"></i>Planos y Documentos Adjuntos</h3>
-    </div>
-    <div class="card-body">
-        <?php if (!empty($documentos)): ?>
-            <div class="table-container">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Archivo</th>
-                            <th>Tipo</th>
-                            <th>Fecha</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($documentos as $doc): ?>
-                            <tr>
-                                <td class="fw-600">
-                                    <div class="cell-with-avatar">
-                                        <span class="file-icon file-plan"><i class="fas fa-file-alt"></i></span>
-                                        <div class="cell-name"><?= e($doc['nombre_del_archivo']) ?></div>
-                                    </div>
-                                </td>
-                                <td><span class="badge-dot dot-neutral"><?= e($doc['tipo_de_documento']) ?></span></td>
-                                <td><span class="cell-icon-text"><i class="fas fa-calendar-alt"></i> <?= formatDate($doc['fecha_de_subida']) ?></span></td>
-                                <td>
-                                    <a href="<?= url("documento/download/{$doc['id_documento']}") ?>" class="btn-action act-download" title="Descargar">
-                                        <i class="fas fa-download"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        <?php else: ?>
-            <div class="empty-state">
-                <i class="fas fa-file-upload"></i>
-                <h3>Sin documentos adjuntos</h3>
-                <p>No hay planos ni archivos vinculados a este proyecto</p>
+                <i class="fas fa-user-plus"></i>
+                <h3>Sin personal asignado</h3>
+                <p>No hay técnicos asignados a este proyecto</p>
             </div>
         <?php endif; ?>
     </div>

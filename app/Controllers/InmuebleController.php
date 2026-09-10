@@ -37,7 +37,7 @@ class InmuebleController extends Controller
 
         $this->view('inmuebles/index', [
             'pageTitle'  => 'Gestión de Inmuebles',
-            'pageScript' => 'clientes',
+            'pageScript' => 'inmuebles',
             'inmuebles'  => $inmuebles,
             'clientes'   => $clientes,
         ]);
@@ -47,10 +47,11 @@ class InmuebleController extends Controller
     {
         $clientes = (new Cliente())->all('nombre', 'ASC');
         $this->view('inmuebles/form', [
-            'pageTitle' => 'Nuevo Inmueble',
-            'inmueble'  => null,
-            'clientes'  => $clientes,
-            'action'    => url('inmueble/store'),
+            'pageTitle'  => 'Nuevo Inmueble',
+            'pageScript' => 'inmuebles',
+            'inmueble'   => null,
+            'clientes'   => $clientes,
+            'action'     => url('inmueble/store'),
         ]);
     }
 
@@ -64,15 +65,23 @@ class InmuebleController extends Controller
         $data = $this->allInput();
         unset($data['_csrf_token']);
 
+        // Limpiar matrícula: solo permitir números
+        if (!empty($data['matricula'])) {
+            $data['matricula'] = preg_replace('/\D/', '', (string) $data['matricula']);
+        }
+
         $validator = new Validator($data);
-        if (!$validator->validate([
+        $valid = $validator->validate([
             'id_cliente'    => 'required|numeric',
-            'matricula'     => 'required|max:30|unique:inmuebles',
+            'matricula'     => 'required|matricula|unique:inmuebles',
             'direccion'     => 'required',
-            'area'          => 'decimal',
+            'area'          => 'required|decimal|min_num:50',
             'tipo_inmueble' => 'required|max:30',
-        ])) {
-            Session::flash('error', $validator->firstError());
+        ]);
+        $errors = array_merge($validator->getErrors(), \App\Models\Ubicacion::errores($data));
+        if (!$valid || $errors) {
+            \Core\FormState::save(url('inmueble/store'), $data, $errors);
+            Session::flash('error', reset($errors));
             $this->redirect('inmueble/create');
             return;
         }
@@ -94,10 +103,11 @@ class InmuebleController extends Controller
 
         $clientes = (new Cliente())->all('nombre', 'ASC');
         $this->view('inmuebles/form', [
-            'pageTitle' => 'Editar Inmueble',
-            'inmueble'  => $inmueble,
-            'clientes'  => $clientes,
-            'action'    => url("inmueble/update/{$id}"),
+            'pageTitle'  => 'Editar Inmueble',
+            'pageScript' => 'inmuebles',
+            'inmueble'   => $inmueble,
+            'clientes'   => $clientes,
+            'action'     => url("inmueble/update/{$id}"),
         ]);
     }
 
@@ -111,15 +121,23 @@ class InmuebleController extends Controller
         $data = $this->allInput();
         unset($data['_csrf_token']);
 
+        // Limpiar matrícula: solo permitir números
+        if (!empty($data['matricula'])) {
+            $data['matricula'] = preg_replace('/\D/', '', (string) $data['matricula']);
+        }
+
         $validator = new Validator($data);
-        if (!$validator->validate([
+        $valid = $validator->validate([
             'id_cliente'    => 'required|numeric',
-            'matricula'     => "required|max:30|unique:inmuebles,{$id}",
+            'matricula'     => "required|matricula|unique:inmuebles,{$id}",
             'direccion'     => 'required',
-            'area'          => 'decimal',
+            'area'          => 'required|decimal|min_num:50',
             'tipo_inmueble' => 'required|max:30',
-        ])) {
-            Session::flash('error', $validator->firstError());
+        ]);
+        $errors = array_merge($validator->getErrors(), \App\Models\Ubicacion::errores($data));
+        if (!$valid || $errors) {
+            \Core\FormState::save(url("inmueble/update/{$id}"), $data, $errors);
+            Session::flash('error', reset($errors));
             $this->redirect("inmueble/edit/{$id}");
             return;
         }
@@ -139,6 +157,21 @@ class InmuebleController extends Controller
 
         try {
             $inmueble = $this->model->find($id);
+            if (!$inmueble) {
+                $this->json(['success' => false, 'message' => 'Inmueble no encontrado.'], 404);
+                return;
+            }
+
+            // Validar si tiene proyectos asociados antes de eliminar
+            $totalProyectos = $this->model->countProyectos($id);
+            if ($totalProyectos > 0) {
+                $msg = $totalProyectos === 1
+                    ? 'No se puede eliminar: el inmueble tiene 1 proyecto asociado.'
+                    : "No se puede eliminar: el inmueble tiene {$totalProyectos} proyectos asociados.";
+                $this->json(['success' => false, 'message' => $msg], 400);
+                return;
+            }
+
             $this->model->delete($id);
             $this->logActivity('Eliminó inmueble: ' . ($inmueble['matricula'] ?? ''), 'inmuebles', $id);
             $this->json(['success' => true, 'message' => 'Inmueble eliminado exitosamente.']);

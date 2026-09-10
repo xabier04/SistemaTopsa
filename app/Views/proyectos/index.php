@@ -1,21 +1,20 @@
-<?php /** Vista: Listado de Proyectos */ ?>
+<?php /** Vista: Listado de Proyectos — Sprint Backlog */ ?>
 <?php
     $enProceso = 0; $finalizados = 0; $incompletos = 0;
-    $totalPresupuesto = 0; $totalAbonado = 0;
+    $totalPresupuesto = 0;
     if (!empty($proyectos)) {
         foreach ($proyectos as $p) {
             $estado = $p['estado_del_proyecto'] ?? '';
-            if ($estado === 'En Proceso') $enProceso++;
-            elseif ($estado === 'Finalizado') $finalizados++;
-            else $incompletos++;
+            if ($estado === 'Finalizado' || $estado === 'Aprobado') $finalizados++;
+            elseif ($estado === 'Incompleto') $incompletos++;
+            else $enProceso++;
             $totalPresupuesto += ($p['presupuesto_inicial'] ?? 0);
-            $totalAbonado += ($p['total_abonado'] ?? 0);
         }
     }
 ?>
 
-<div class="page-header">
-    <h2><i class="fas fa-project-diagram"></i> Proyectos</h2>
+<div class="page-header topsa-hero">
+    <div><span class="topsa-eyebrow">CONTROL DE TRABAJOS</span><h2>Proyectos</h2><p>Organiza tus trabajos y consulta cada detalle desde un solo lugar.</p></div>
     <a href="<?= url('proyecto/create') ?>" class="btn btn-primary">
         <i class="fas fa-plus"></i> Nuevo Proyecto
     </a>
@@ -53,14 +52,19 @@
     </div>
 </div>
 
-<div class="filter-bar">
+<div class="filter-bar project-toolbar">
     <div class="search-input">
         <i class="fas fa-search"></i>
-        <input type="text" class="form-control" id="searchProyectos" placeholder="Buscar por nombre o cliente...">
+        <input type="search" class="form-control" id="searchProyectos" aria-label="Buscar proyectos" placeholder="Buscar por nombre o cliente...">
+    </div>
+    <div class="view-switch" role="group" aria-label="Vista de proyectos">
+        <button type="button" class="btn btn-outline" data-project-view="table" aria-pressed="true"><i class="fas fa-list" aria-hidden="true"></i> Tabla</button>
+        <button type="button" class="btn btn-outline" data-project-view="cards" aria-pressed="false"><i class="fas fa-grip" aria-hidden="true"></i> Tarjetas</button>
     </div>
 </div>
+<p id="projectResults" class="project-results" role="status" aria-live="polite"></p>
 
-<div class="card">
+<div class="card" id="projectTable">
     <div class="table-container">
         <table class="table">
             <thead>
@@ -70,8 +74,7 @@
                     <th>Cliente</th>
                     <th>Fecha Inicio</th>
                     <th>Presupuesto</th>
-                    <th>Abonado</th>
-                    <th>Saldo</th>
+                    <th>Inmueble</th>
                     <th>Estado</th>
                     <th>Acciones</th>
                 </tr>
@@ -80,27 +83,16 @@
                 <?php if (!empty($proyectos)): ?>
                     <?php foreach ($proyectos as $i => $p): ?>
                         <?php
-                            $saldo = $p['saldo_pendiente'] ?? 0;
                             $estadoProy = $p['estado_del_proyecto'] ?? '';
-                            $dotEstado = match($estadoProy) {
-                                'Finalizado' => 'dot-success',
-                                'En Proceso' => 'dot-warning',
-                                'Incompleto' => 'dot-danger',
-                                default => 'dot-neutral'
-                            };
-                            // Calculate payment progress
-                            $presupuesto = $p['presupuesto_inicial'] ?? 0;
-                            $abonado = $p['total_abonado'] ?? 0;
-                            $pagoPct = $presupuesto > 0 ? min(100, round(($abonado / $presupuesto) * 100)) : 0;
+                            $dotEstado = estadoDotClass($estadoProy);
                         ?>
-                        <tr>
+                        <tr data-project-id="<?= (int) $p['id_proyecto'] ?>" data-state="<?= e($estadoProy) ?>">
                             <td><?= $i + 1 ?></td>
                             <td class="fw-600"><?= e($p['nombre_del_proyecto']) ?></td>
                             <td><?= e($p['nombre_cliente'] ?? '—') ?></td>
                             <td><span class="cell-icon-text"><i class="fas fa-calendar-alt"></i> <?= formatDate($p['fecha_de_inicio']) ?></span></td>
                             <td><span class="cell-money"><?= formatMoney($p['presupuesto_inicial']) ?></span></td>
-                            <td><span class="cell-money positive"><?= formatMoney($abonado) ?></span></td>
-                            <td><span class="cell-money <?= $saldo > 0 ? 'negative' : 'positive' ?>"><?= formatMoney($saldo) ?></span></td>
+                            <td><?= e($p['direccion_inmueble'] ?? '—') ?></td>
                             <td>
                                 <span class="badge-dot <?= $dotEstado ?>"><?= e($estadoProy) ?></span>
                             </td>
@@ -121,7 +113,7 @@
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="9">
+                        <td colspan="8">
                             <div class="empty-state">
                                 <i class="fas fa-project-diagram"></i>
                                 <h3>Sin proyectos</h3>
@@ -134,3 +126,10 @@
         </table>
     </div>
 </div>
+<div id="projectCards" class="project-cards" hidden></div>
+<div id="projectEmpty" class="card empty-state" hidden><i class="fas fa-search" aria-hidden="true"></i><h3>No encontramos proyectos</h3><p>Prueba otro nombre o cambia los filtros.</p><button type="button" class="btn btn-outline" id="clearProjectFilters">Limpiar filtros</button></div>
+<dialog id="projectPreview" class="project-preview" aria-labelledby="previewTitle">
+    <div class="preview-header"><span class="topsa-eyebrow">CONSULTA RÁPIDA</span><button type="button" class="btn btn-outline" id="closeProjectPreview" aria-label="Cerrar consulta">&times;</button></div>
+    <h2 id="previewTitle"></h2><div id="previewBody"></div>
+    <a id="previewDetail" class="btn btn-primary">Abrir detalle completo <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+</dialog>

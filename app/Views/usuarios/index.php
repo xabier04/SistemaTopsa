@@ -27,6 +27,7 @@
                     <th>Empleado</th>
                     <th>Rol</th>
                     <th>Estado</th>
+                    <th>Contraseña</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -60,6 +61,7 @@
                                     <?= e($u['estado_de_cuenta']) ?>
                                 </span>
                             </td>
+                            <td><?= !empty($u['requiere_cambio_contrasena']) ? 'Temporal · pendiente de cambio' : 'Establecida' ?></td>
                             <td>
                                 <div class="table-actions">
                                     <a href="<?= url("usuario/edit/{$u['id_usuario']}") ?>" class="btn-action act-edit" title="Editar"><i class="fas fa-edit"></i></a>
@@ -72,7 +74,7 @@
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="7">
+                        <td colspan="8">
                             <div class="empty-state">
                                 <i class="fas fa-users"></i>
                                 <h3>Sin usuarios</h3>

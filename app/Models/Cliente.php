@@ -30,13 +30,9 @@ class Cliente extends Model
      */
     public function getProyectos(int $idCliente): array
     {
-        $sql = "SELECT p.*, 
-                       COALESCE(SUM(t.monto_abonado), 0) as total_abonado,
-                       (p.presupuesto_inicial - COALESCE(SUM(t.monto_abonado), 0)) as saldo
+        $sql = "SELECT p.*
                 FROM proyectos p
-                LEFT JOIN transacciones t ON p.id_proyecto = t.id_proyecto
                 WHERE p.id_cliente = :id
-                GROUP BY p.id_proyecto
                 ORDER BY p.fecha_de_inicio DESC";
         return $this->db->query($sql, [':id' => $idCliente])->fetchAll();
     }

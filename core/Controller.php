@@ -135,15 +135,17 @@ abstract class Controller
         $db = Database::getInstance();
         $user = Session::getUser();
 
+        $userId = $user['id_usuario'] ?? null;
+
         $db->query(
             "INSERT INTO bitacora (id_usuario, accion, tabla_afectada, id_registro, ip_address) 
              VALUES (:id_usuario, :accion, :tabla, :id_registro, :ip)",
             [
-                ':id_usuario'  => $user['id_usuario'] ?? 0,
+                ':id_usuario'  => $userId,
                 ':accion'      => $accion,
-                ':tabla'       => $tablaAfectada,
+                ':tabla'       => $tablaAfectada ?: null,
                 ':id_registro' => $idRegistro,
-                ':ip'          => $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0',
+                ':ip'          => $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
             ]
         );
     }

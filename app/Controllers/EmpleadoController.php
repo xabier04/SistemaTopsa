@@ -63,8 +63,7 @@ class EmpleadoController extends Controller
             return;
         }
 
-        $data = $this->allInput();
-        unset($data['_csrf_token']);
+        $data = array_intersect_key($this->allInput(), array_flip(['nombre_completo', 'dui', 'cargo', 'telefono', 'estado']));
 
         $validator = new Validator($data);
         if (!$validator->validate([
@@ -74,6 +73,7 @@ class EmpleadoController extends Controller
             'telefono'        => 'phone',
             'estado'          => 'required|in:Activo,Inactivo',
         ])) {
+            \Core\FormState::save(url('empleado/store'), $data, $validator->getErrors());
             Session::flash('error', $validator->firstError());
             $this->redirect('empleado/create');
             return;
@@ -108,8 +108,7 @@ class EmpleadoController extends Controller
             return;
         }
 
-        $data = $this->allInput();
-        unset($data['_csrf_token']);
+        $data = array_intersect_key($this->allInput(), array_flip(['nombre_completo', 'dui', 'cargo', 'telefono', 'estado']));
 
         $validator = new Validator($data);
         if (!$validator->validate([
@@ -119,6 +118,7 @@ class EmpleadoController extends Controller
             'telefono'        => 'phone',
             'estado'          => 'required|in:Activo,Inactivo',
         ])) {
+            \Core\FormState::save(url("empleado/update/{$id}"), $data, $validator->getErrors());
             Session::flash('error', $validator->firstError());
             $this->redirect("empleado/edit/{$id}");
             return;
@@ -132,7 +132,7 @@ class EmpleadoController extends Controller
 
     public function delete(int $id = 0): void
     {
-        if (!\Core\Router::isAjax()) {
+        if (!\Core\Router::isAjax() || !$this->isPost() || !$this->validateCsrf()) {
             $this->redirect('empleado/index');
             return;
         }

@@ -48,9 +48,10 @@ class ClienteController extends Controller
     public function create(): void
     {
         $this->view('clientes/form', [
-            'pageTitle' => 'Nuevo Cliente',
-            'cliente'   => null,
-            'action'    => url('cliente/store'),
+            'pageTitle'  => 'Nuevo Cliente',
+            'pageScript' => 'clientes',
+            'cliente'    => null,
+            'action'     => url('cliente/store'),
         ]);
     }
 
@@ -67,13 +68,29 @@ class ClienteController extends Controller
         $data = $this->allInput();
         unset($data['_csrf_token']);
 
+        // Normalizar DUI y Teléfono si vienen en números planos
+        if (!empty($data['dui'])) {
+            $duiDigits = preg_replace('/\D/', '', (string) $data['dui']);
+            if (strlen($duiDigits) === 9 && !str_contains((string) $data['dui'], '-')) {
+                $data['dui'] = substr($duiDigits, 0, 8) . '-' . substr($duiDigits, 8, 1);
+            }
+        }
+        if (!empty($data['telefono'])) {
+            $telDigits = preg_replace('/\D/', '', (string) $data['telefono']);
+            if (strlen($telDigits) === 8 && !str_contains((string) $data['telefono'], '-')) {
+                $data['telefono'] = substr($telDigits, 0, 4) . '-' . substr($telDigits, 4, 4);
+            }
+        }
+
         $validator = new Validator($data);
         if (!$validator->validate([
-            'nombre'   => 'required|max:90',
-            'dui'      => 'required|dui|unique:clientes',
-            'telefono' => 'phone',
+            'nombre'             => 'required|max:90|no_numbers',
+            'dui'                => 'required|dui|unique:clientes',
+            'telefono'           => 'phone',
             'correo_electronico' => 'email|max:50',
+            'direccion'          => 'required',
         ])) {
+            \Core\FormState::save(url('cliente/store'), $data, $validator->getErrors());
             Session::flash('error', $validator->firstError());
             $this->redirect('cliente/create');
             return;
@@ -98,9 +115,10 @@ class ClienteController extends Controller
         }
 
         $this->view('clientes/form', [
-            'pageTitle' => 'Editar Cliente',
-            'cliente'   => $cliente,
-            'action'    => url("cliente/update/{$id}"),
+            'pageTitle'  => 'Editar Cliente',
+            'pageScript' => 'clientes',
+            'cliente'    => $cliente,
+            'action'     => url("cliente/update/{$id}"),
         ]);
     }
 
@@ -117,13 +135,29 @@ class ClienteController extends Controller
         $data = $this->allInput();
         unset($data['_csrf_token']);
 
+        // Normalizar DUI y Teléfono si vienen en números planos
+        if (!empty($data['dui'])) {
+            $duiDigits = preg_replace('/\D/', '', (string) $data['dui']);
+            if (strlen($duiDigits) === 9 && !str_contains((string) $data['dui'], '-')) {
+                $data['dui'] = substr($duiDigits, 0, 8) . '-' . substr($duiDigits, 8, 1);
+            }
+        }
+        if (!empty($data['telefono'])) {
+            $telDigits = preg_replace('/\D/', '', (string) $data['telefono']);
+            if (strlen($telDigits) === 8 && !str_contains((string) $data['telefono'], '-')) {
+                $data['telefono'] = substr($telDigits, 0, 4) . '-' . substr($telDigits, 4, 4);
+            }
+        }
+
         $validator = new Validator($data);
         if (!$validator->validate([
-            'nombre'   => 'required|max:90',
-            'dui'      => "required|dui|unique:clientes,{$id}",
-            'telefono' => 'phone',
+            'nombre'             => 'required|max:90|no_numbers',
+            'dui'                => "required|dui|unique:clientes,{$id}",
+            'telefono'           => 'phone',
             'correo_electronico' => 'email|max:50',
+            'direccion'          => 'required',
         ])) {
+            \Core\FormState::save(url("cliente/update/{$id}"), $data, $validator->getErrors());
             Session::flash('error', $validator->firstError());
             $this->redirect("cliente/edit/{$id}");
             return;

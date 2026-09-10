@@ -8,10 +8,6 @@ use Core\Validator;
 use App\Models\Proyecto;
 use App\Models\Cliente;
 use App\Models\Inmueble;
-use App\Models\Empleado;
-use App\Models\Transaccion;
-use App\Models\Valuo;
-use App\Models\Documento;
 
 /**
  * Controlador de Proyectos
@@ -52,6 +48,7 @@ class ProyectoController extends Controller
 
         $this->view('proyectos/form', [
             'pageTitle'  => 'Nuevo Proyecto',
+            'pageScript' => 'proyectos',
             'proyecto'   => null,
             'clientes'   => $clientes,
             'inmuebles'  => $inmuebles,
@@ -72,9 +69,9 @@ class ProyectoController extends Controller
         $validator = new Validator($data);
         if (!$validator->validate([
             'id_cliente'           => 'required|numeric',
-            'nombre_del_proyecto'  => 'required|max:60',
+            'nombre_del_proyecto'  => 'required|max:60|no_numbers',
             'fecha_de_inicio'      => 'required|date',
-            'estado_del_proyecto'  => 'required|in:En Proceso,Incompleto,Finalizado',
+            'estado_del_proyecto'  => 'required|in:En Proceso,Observado,Aprobado,Finalizado,Incompleto',
             'presupuesto_inicial'  => 'required|numeric',
         ])) {
             Session::flash('error', $validator->firstError());
@@ -84,6 +81,14 @@ class ProyectoController extends Controller
 
         if (empty($data['id_inmueble'])) {
             $data['id_inmueble'] = null;
+        } else {
+            // Validar que el inmueble seleccionado pertenezca al cliente
+            $inmueble = (new Inmueble())->find((int) $data['id_inmueble']);
+            if (!$inmueble || (int) $inmueble['id_cliente'] !== (int) $data['id_cliente']) {
+                Session::flash('error', 'El inmueble seleccionado no pertenece al cliente seleccionado.');
+                $this->redirect('proyecto/create');
+                return;
+            }
         }
 
         $id = $this->model->create($data);
@@ -106,6 +111,7 @@ class ProyectoController extends Controller
 
         $this->view('proyectos/form', [
             'pageTitle'  => 'Editar Proyecto',
+            'pageScript' => 'proyectos',
             'proyecto'   => $proyecto,
             'clientes'   => $clientes,
             'inmuebles'  => $inmuebles,
@@ -126,9 +132,9 @@ class ProyectoController extends Controller
         $validator = new Validator($data);
         if (!$validator->validate([
             'id_cliente'           => 'required|numeric',
-            'nombre_del_proyecto'  => 'required|max:60',
+            'nombre_del_proyecto'  => 'required|max:60|no_numbers',
             'fecha_de_inicio'      => 'required|date',
-            'estado_del_proyecto'  => 'required|in:En Proceso,Incompleto,Finalizado',
+            'estado_del_proyecto'  => 'required|in:En Proceso,Observado,Aprobado,Finalizado,Incompleto',
             'presupuesto_inicial'  => 'required|numeric',
         ])) {
             Session::flash('error', $validator->firstError());
@@ -138,6 +144,14 @@ class ProyectoController extends Controller
 
         if (empty($data['id_inmueble'])) {
             $data['id_inmueble'] = null;
+        } else {
+            // Validar que el inmueble seleccionado pertenezca al cliente
+            $inmueble = (new Inmueble())->find((int) $data['id_inmueble']);
+            if (!$inmueble || (int) $inmueble['id_cliente'] !== (int) $data['id_cliente']) {
+                Session::flash('error', 'El inmueble seleccionado no pertenece al cliente seleccionado.');
+                $this->redirect("proyecto/edit/{$id}");
+                return;
+            }
         }
 
         $this->model->update($id, $data);
@@ -158,19 +172,13 @@ class ProyectoController extends Controller
             return;
         }
 
-        $empleados     = $this->model->getEmpleados($id);
-        $transacciones = (new Transaccion())->getByProyecto($id);
-        $valuaciones   = (new Valuo())->getByProyecto($id);
-        $documentos    = (new Documento())->getByProyecto($id);
+        $empleados = $this->model->getEmpleados($id);
 
         $this->view('proyectos/detalle', [
             'pageTitle'     => $proyecto['nombre_del_proyecto'],
             'pageScript'    => 'proyectos',
             'proyecto'      => $proyecto,
             'empleados'     => $empleados,
-            'transacciones' => $transacciones,
-            'valuaciones'   => $valuaciones,
-            'documentos'    => $documentos,
         ]);
     }
 

@@ -23,7 +23,7 @@ class UsuarioController extends Controller
 
     public function getRequiredRole(string $action): ?string
     {
-        return 'Administrador';
+        return in_array($action, ['cambiarClave', 'guardarClave'], true) ? null : 'Administrador';
     }
 
     public function index(): void
@@ -38,10 +38,11 @@ class UsuarioController extends Controller
 
     public function create(): void
     {
-        $empleados = (new Empleado())->activos();
+        $empleados = (new Empleado())->all('nombre_completo', 'ASC');
         $this->view('usuarios/form', [
             'pageTitle' => 'Nuevo Usuario',
             'usuario'   => null,
+            'seleccionEmpleado' => (int) ($_GET['id_empleado'] ?? 0),
             'empleados' => $empleados,
             'action'    => url('usuario/store'),
         ]);
@@ -54,27 +55,35 @@ class UsuarioController extends Controller
             return;
         }
 
-        $data = $this->allInput();
-        unset($data['_csrf_token']);
+        $data = array_intersect_key($this->allInput(), array_flip(['id_empleado', 'nombre', 'correo', 'rol', 'estado_de_cuenta']));
 
         $validator = new Validator($data);
-        if (!$validator->validate([
+        $valid = $validator->validate([
             'id_empleado'      => 'required|numeric',
             'nombre'           => 'required|max:60',
             'correo'           => 'required|email|max:50|unique:usuarios',
-            'contrasena'       => 'required|min:6',
             'rol'              => 'required|in:Administrador,Empleado',
             'estado_de_cuenta' => 'required|in:Activo,Inactivo,Bloqueado',
-        ])) {
-            Session::flash('error', $validator->firstError());
+        ]);
+        $errors = $validator->getErrors();
+        if (!(new Empleado())->find((int) ($data['id_empleado'] ?? 0))) {
+            $errors['id_empleado'] = 'Seleccione un empleado válido.';
+        }
+        if (!$valid || $errors) {
+            \Core\FormState::save(url('usuario/store'), $data, $errors);
+            Session::flash('error', reset($errors));
             $this->redirect('usuario/create');
             return;
         }
 
-        $this->model->createUser($data);
+        $temporal = Usuario::temporaryPassword();
+        $data['contrasena'] = $temporal;
+        $data['requiere_cambio_contrasena'] = 1;
+        $id = $this->model->createUser($data);
+        $this->rememberCredential($id, $temporal);
         $this->logActivity('Creó usuario: ' . $data['nombre'], 'usuarios');
-        Session::flash('success', 'Usuario creado exitosamente.');
-        $this->redirect('usuario/index');
+        Session::flash('success', 'Usuario creado con contraseña temporal.');
+        $this->redirect("usuario/credenciales/{$id}");
     }
 
     public function edit(int $id = 0): void
@@ -86,7 +95,7 @@ class UsuarioController extends Controller
             return;
         }
 
-        $empleados = (new Empleado())->activos();
+        $empleados = (new Empleado())->all('nombre_completo', 'ASC');
         $this->view('usuarios/form', [
             'pageTitle' => 'Editar Usuario',
             'usuario'   => $usuario,
@@ -102,26 +111,30 @@ class UsuarioController extends Controller
             return;
         }
 
-        $data = $this->allInput();
-        unset($data['_csrf_token']);
+        $data = array_intersect_key($this->allInput(), array_flip(['id_empleado', 'nombre', 'correo', 'rol', 'estado_de_cuenta']));
 
-        // Si la contraseña viene vacía, no actualizarla
-        if (empty($data['contrasena'])) {
-            unset($data['contrasena']);
-        } else {
-            $data['contrasena'] = password_hash($data['contrasena'], PASSWORD_BCRYPT);
+        if (!$this->model->find($id)) {
+            $this->redirect('usuario/index');
+            return;
         }
 
         $validator = new Validator($data);
         $rules = [
+            'id_empleado' => 'required|numeric',
             'nombre'           => 'required|max:60',
             'correo'           => "required|email|max:50|unique:usuarios,{$id}",
             'rol'              => 'required|in:Administrador,Empleado',
             'estado_de_cuenta' => 'required|in:Activo,Inactivo,Bloqueado',
         ];
 
-        if (!$validator->validate($rules)) {
-            Session::flash('error', $validator->firstError());
+        $valid = $validator->validate($rules);
+        $errors = $validator->getErrors();
+        if (!(new Empleado())->find((int) ($data['id_empleado'] ?? 0))) {
+            $errors['id_empleado'] = 'Seleccione un empleado válido.';
+        }
+        if (!$valid || $errors) {
+            \Core\FormState::save(url("usuario/update/{$id}"), $data, $errors);
+            Session::flash('error', reset($errors));
             $this->redirect("usuario/edit/{$id}");
             return;
         }
@@ -135,9 +148,87 @@ class UsuarioController extends Controller
     /**
      * Toggle estado de cuenta (AJAX)
      */
+    private function rememberCredential(int $id, string $password): void
+    {
+        $_SESSION['credential'] = ['id' => $id, 'password' => $password, 'expires' => time() + 600];
+    }
+
+    public function credenciales(int $id = 0): void
+    {
+        header('Cache-Control: no-store, private');
+        header('Referrer-Policy: no-referrer');
+        $credential = $_SESSION['credential'] ?? null;
+        unset($_SESSION['credential']);
+        $usuario = $this->model->find($id);
+        if (!$usuario || !$credential || $credential['id'] !== $id || $credential['expires'] < time()
+            || !password_verify($credential['password'], $usuario['contrasena'])) {
+            Session::flash('error', 'La contraseña solo se muestra una vez. Puede generar otra desde Editar Usuario.');
+            $this->redirect('usuario/index');
+            return;
+        }
+        $empleado = (new Empleado())->find((int) $usuario['id_empleado']);
+        $this->view('usuarios/credenciales', [
+            'pageTitle' => 'Contraseña temporal', 'usuario' => $usuario,
+            'temporal' => $credential['password'], 'telefono' => $empleado['telefono'] ?? '',
+        ]);
+    }
+
+    public function regenerar(int $id = 0): void
+    {
+        if (!$this->isPost() || !$this->validateCsrf() || !$this->model->find($id)) {
+            $this->redirect('usuario/index');
+            return;
+        }
+        $temporal = Usuario::temporaryPassword();
+        $this->model->update($id, [
+            'contrasena' => password_hash($temporal, PASSWORD_BCRYPT),
+            'requiere_cambio_contrasena' => 1,
+        ]);
+        $this->rememberCredential($id, $temporal);
+        $this->logActivity('Generó una nueva contraseña temporal', 'usuarios', $id);
+        $this->redirect("usuario/credenciales/{$id}");
+    }
+
+    public function cambiarClave(): void
+    {
+        header('Cache-Control: no-store, private');
+        $this->view('usuarios/cambiar_clave', ['pageTitle' => 'Cambiar contraseña']);
+    }
+
+    public function guardarClave(): void
+    {
+        if (!$this->isPost() || !$this->validateCsrf()) {
+            $this->redirect('usuario/cambiarClave');
+            return;
+        }
+        // Nunca conservar contraseñas en el estado del formulario ni en bitácora.
+        $correo = trim((string) ($_POST['correo'] ?? ''));
+        $actual = (string) ($_POST['actual'] ?? '');
+        $nueva = (string) ($_POST['nueva'] ?? '');
+        $confirmacion = (string) ($_POST['confirmacion'] ?? '');
+        $errors = [];
+        if (strlen($nueva) < 12 || strlen($nueva) > 72) {
+            $errors['nueva'] = 'Use al menos 12 caracteres; si la contraseña es demasiado larga, reduzca su longitud.';
+        } elseif ($nueva !== $confirmacion) {
+            $errors['confirmacion'] = 'La confirmación no coincide con la nueva contraseña.';
+        } elseif ($nueva === $actual) {
+            $errors['nueva'] = 'Elija una contraseña diferente a la actual.';
+        } elseif (!$this->model->changeOwnPassword($correo, $actual, $nueva)) {
+            $errors['actual'] = 'El correo o la contraseña actual no son válidos, o la cuenta no está activa.';
+        }
+        if ($errors) {
+            \Core\FormState::save(url('usuario/guardarClave'), ['correo' => $correo], $errors);
+            Session::flash('error', reset($errors));
+        } else {
+            unset($_SESSION['credential']);
+            Session::flash('success', 'Contraseña cambiada correctamente. Ya puede descartar la contraseña anterior.');
+        }
+        $this->redirect('usuario/cambiarClave');
+    }
+
     public function toggleEstado(int $id = 0): void
     {
-        if (!\Core\Router::isAjax()) {
+        if (!\Core\Router::isAjax() || !$this->isPost() || !$this->validateCsrf()) {
             $this->redirect('usuario/index');
             return;
         }

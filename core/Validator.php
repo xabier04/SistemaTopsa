@@ -52,6 +52,7 @@ class Validator
                     'unique'    => $this->validateUnique($field, $value, $fieldLabel, $params[0], $params[1] ?? null),
                     'phone'     => $this->validatePhone($field, $value, $fieldLabel),
                     'dui'       => $this->validateDui($field, $value, $fieldLabel),
+                    'matricula' => $this->validateMatricula($field, $value, $fieldLabel),
                     default     => null,
                 };
             }
@@ -91,12 +92,34 @@ class Validator
     }
 
     /**
-     * Formato de correo electrónico
+     * Formato de correo electrónico real
      */
     private function validateEmail(string $field, mixed $value, string $label): void
     {
-        if ($value !== null && $value !== '' && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
-            $this->errors[$field] = "El campo {$label} debe ser un correo válido.";
+        if ($value !== null && $value !== '') {
+            $email = trim((string) $value);
+            // 1. Validación de filtro nativo de PHP
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $this->errors[$field] = "El campo {$label} debe ser un correo electrónico válido.";
+                return;
+            }
+            // 2. Estructura con dominio real y extensión válida (mínimo 2 letras en el TLD)
+            if (!preg_match('/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/', $email)) {
+                $this->errors[$field] = "El campo {$label} debe tener un formato de correo real (ejemplo@dominio.com).";
+                return;
+            }
+            // 3. Rechazar dominios ficticios / de prueba
+            $parts = explode('@', $email);
+            $domain = strtolower($parts[1] ?? '');
+            $fakeDomains = [
+                'test.com', 'example.com', 'fake.com', 'correo.com', 
+                'prueba.com', 'temporal.com', 'mailinator.com', 'demo.com', 
+                'nada.com', 'test.test', 'email.com', 'temp.com'
+            ];
+            if (in_array($domain, $fakeDomains, true)) {
+                $this->errors[$field] = "El campo {$label} debe ser un correo electrónico real y no de prueba.";
+                return;
+            }
         }
     }
 
@@ -173,8 +196,8 @@ class Validator
      */
     private function validatePhone(string $field, mixed $value, string $label): void
     {
-        if ($value !== null && $value !== '' && !preg_match('/^\d{4}-?\d{4}$/', (string) $value)) {
-            $this->errors[$field] = "El campo {$label} debe tener formato de teléfono válido (0000-0000).";
+        if ($value !== null && $value !== '' && !preg_match('/^\d{4}-\d{4}$/', (string) $value)) {
+            $this->errors[$field] = "El campo {$label} debe tener formato válido con guion (0000-0000).";
         }
     }
 
@@ -184,7 +207,17 @@ class Validator
     private function validateDui(string $field, mixed $value, string $label): void
     {
         if ($value !== null && $value !== '' && !preg_match('/^\d{8}-\d$/', (string) $value)) {
-            $this->errors[$field] = "El campo {$label} debe tener formato de DUI válido (00000000-0).";
+            $this->errors[$field] = "El campo {$label} debe tener formato válido con guion (00000000-0).";
+        }
+    }
+
+    /**
+     * Matrícula de inmueble (exactamente 8 números)
+     */
+    private function validateMatricula(string $field, mixed $value, string $label): void
+    {
+        if ($value !== null && $value !== '' && !preg_match('/^\d{8}$/', (string) $value)) {
+            $this->errors[$field] = "El campo {$label} debe contener exactamente 8 números.";
         }
     }
 
@@ -205,11 +238,28 @@ class Validator
     }
 
     /**
-     * Convertir nombre de campo a formato legible
+     * Convertir nombre de campo a formato legible y profesional
      */
     private function humanize(string $field): string
     {
-        return str_replace('_', ' ', $field);
+        $custom = [
+            'nombre'              => 'Nombre Completo',
+            'dui'                 => 'DUI',
+            'telefono'            => 'Teléfono',
+            'correo_electronico'  => 'Correo Electrónico',
+            'direccion'           => 'Dirección',
+            'matricula'           => 'Matrícula',
+            'tipo_inmueble'       => 'Tipo de Inmueble',
+            'area'                => 'Área',
+            'id_cliente'          => 'Cliente',
+            'id_inmueble'         => 'Inmueble',
+            'nombre_del_proyecto' => 'Nombre del Proyecto',
+            'fecha_de_inicio'     => 'Fecha de Inicio',
+            'presupuesto_inicial' => 'Presupuesto Inicial',
+            'estado_del_proyecto' => 'Estado del Proyecto',
+        ];
+
+        return $custom[$field] ?? ucfirst(str_replace('_', ' ', $field));
     }
 
     /**

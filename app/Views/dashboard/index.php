@@ -1,6 +1,7 @@
 <?php
 /**
- * Dashboard — Vista Principal
+ * Panel Principal — Vista de Resumen
+ * Sprint Backlog: Clientes, Inmuebles, Proyectos
  */
 
 // Mapear estados a datos legibles
@@ -14,8 +15,13 @@ $finalizados = $estadosMap['Finalizado'] ?? 0;
 ?>
 
 <!-- ─── Tarjetas de Estadísticas ──────────────────────────── -->
+<section class="page-header topsa-hero">
+    <div><span class="topsa-eyebrow">TOPSA · PANORAMA GENERAL</span><h2>Cada proyecto, un paso adelante.</h2><p>Consulta el estado de tus trabajos y accede a lo que necesitas para continuar.</p></div>
+    <div class="hero-actions"><a class="btn btn-primary" href="<?= url('proyecto/create') ?>"><i class="fas fa-plus" aria-hidden="true"></i> Nuevo proyecto</a><a class="btn btn-outline" href="<?= url('proyecto/index') ?>">Explorar proyectos</a></div>
+</section>
+
 <div class="stats-grid">
-    <div class="stat-card">
+    <a class="stat-card" href="<?= url('proyecto/index') ?>">
         <div class="stat-icon blue">
             <i class="fas fa-project-diagram"></i>
         </div>
@@ -26,9 +32,9 @@ $finalizados = $estadosMap['Finalizado'] ?? 0;
                 <span class="badge badge-info"><?= $enProceso ?> en proceso</span>
             </span>
         </div>
-    </div>
+    </a>
 
-    <div class="stat-card">
+    <a class="stat-card" href="<?= url('cliente/index') ?>">
         <div class="stat-icon green">
             <i class="fas fa-user-tie"></i>
         </div>
@@ -36,27 +42,27 @@ $finalizados = $estadosMap['Finalizado'] ?? 0;
             <span class="stat-label">Clientes</span>
             <span class="stat-value"><?= $totalClientes ?></span>
         </div>
-    </div>
+    </a>
 
-    <div class="stat-card">
+    <a class="stat-card" href="<?= url('inmueble/index') ?>">
         <div class="stat-icon purple">
-            <i class="fas fa-users-cog"></i>
+            <i class="fas fa-map-marked-alt"></i>
         </div>
         <div class="stat-content">
-            <span class="stat-label">Empleados Activos</span>
-            <span class="stat-value"><?= $totalEmpleados ?></span>
+            <span class="stat-label">Inmuebles</span>
+            <span class="stat-value"><?= $totalInmuebles ?></span>
         </div>
-    </div>
+    </a>
 
-    <div class="stat-card">
+    <a class="stat-card" href="<?= url('proyecto/index') ?>">
         <div class="stat-icon amber">
             <i class="fas fa-dollar-sign"></i>
         </div>
         <div class="stat-content">
-            <span class="stat-label">Ingresos Totales</span>
-            <span class="stat-value"><?= formatMoney($totalIngresos) ?></span>
+            <span class="stat-label">Presupuesto Total</span>
+            <span class="stat-value"><?= formatMoney($totalPresupuesto) ?></span>
         </div>
-    </div>
+    </a>
 </div>
 
 <!-- ─── Grid Principal ────────────────────────────────────── -->
@@ -71,7 +77,7 @@ $finalizados = $estadosMap['Finalizado'] ?? 0;
             <?php if (!empty($proyectosRecientes)): ?>
                 <ul class="project-list">
                     <?php foreach ($proyectosRecientes as $proy): ?>
-                        <li class="project-item">
+                        <li><a class="project-item" href="<?= url("proyecto/detalle/{$proy['id_proyecto']}") ?>">
                             <div class="project-info">
                                 <div class="project-name"><?= e($proy['nombre_del_proyecto']) ?></div>
                                 <div class="project-client"><?= e($proy['nombre_cliente']) ?> — <?= formatDate($proy['fecha_de_inicio']) ?></div>
@@ -79,7 +85,7 @@ $finalizados = $estadosMap['Finalizado'] ?? 0;
                             <span class="badge-dot <?= estadoDotClass($proy['estado_del_proyecto']) ?>">
                                 <?= e($proy['estado_del_proyecto']) ?>
                             </span>
-                        </li>
+                        </a></li>
                     <?php endforeach; ?>
                 </ul>
             <?php else: ?>
@@ -100,7 +106,7 @@ $finalizados = $estadosMap['Finalizado'] ?? 0;
         <div class="card-body">
             <div style="display: flex; flex-direction: column; gap: var(--space-5);">
                 <!-- En Proceso -->
-                <div>
+                <a class="status-link" href="<?= e(url('proyecto/index') . '?estado=' . rawurlencode('En Proceso')) ?>">
                     <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-2);">
                         <span class="text-sm fw-600">En Proceso</span>
                         <span class="text-sm text-muted"><?= $enProceso ?></span>
@@ -108,10 +114,10 @@ $finalizados = $estadosMap['Finalizado'] ?? 0;
                     <div class="progress-bar">
                         <div class="progress-fill" style="width: <?= $totalProyectos > 0 ? round($enProceso / $totalProyectos * 100) : 0 ?>%"></div>
                     </div>
-                </div>
+                </a>
 
                 <!-- Incompletos -->
-                <div>
+                <a class="status-link" href="<?= e(url('proyecto/index') . '?estado=' . rawurlencode('Incompleto')) ?>">
                     <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-2);">
                         <span class="text-sm fw-600">Incompletos</span>
                         <span class="text-sm text-muted"><?= $incompletos ?></span>
@@ -119,10 +125,10 @@ $finalizados = $estadosMap['Finalizado'] ?? 0;
                     <div class="progress-bar">
                         <div class="progress-fill amber" style="width: <?= $totalProyectos > 0 ? round($incompletos / $totalProyectos * 100) : 0 ?>%"></div>
                     </div>
-                </div>
+                </a>
 
                 <!-- Finalizados -->
-                <div>
+                <a class="status-link" href="<?= e(url('proyecto/index') . '?estado=' . rawurlencode('Finalizado')) ?>">
                     <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-2);">
                         <span class="text-sm fw-600">Finalizados</span>
                         <span class="text-sm text-muted"><?= $finalizados ?></span>
@@ -130,7 +136,7 @@ $finalizados = $estadosMap['Finalizado'] ?? 0;
                     <div class="progress-bar">
                         <div class="progress-fill green" style="width: <?= $totalProyectos > 0 ? round($finalizados / $totalProyectos * 100) : 0 ?>%"></div>
                     </div>
-                </div>
+                </a>
             </div>
 
             <!-- Total Presupuesto -->

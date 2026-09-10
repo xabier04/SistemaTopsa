@@ -3,15 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="base-url" content="<?= url('') ?>">
     <meta name="description" content="Sistema de Gestión — Oficina de Topografía y Servicios Anexos TOPSA">
-    <title><?= e($pageTitle ?? 'Dashboard') ?> — <?= e($appName) ?></title>
+    <title><?= e($pageTitle ?? 'Panel Principal') ?> — <?= e($appName) ?></title>
     <link rel="icon" type="image/svg+xml" href="<?= asset('img/logo-icon.svg') ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="<?= asset('css/flatpickr.min.css') ?>">
     <link rel="stylesheet" href="<?= asset('css/main.css') ?>">
     <link rel="stylesheet" href="<?= asset('css/dashboard.css') ?>">
+    <link rel="stylesheet" href="<?= asset('css/interactive.css') ?>">
 </head>
 <body>
     <div class="app-layout">
@@ -32,7 +35,7 @@
                     <span class="nav-section-title">Principal</span>
                     <a href="<?= url('dashboard/index') ?>" class="nav-link <?= isActiveRoute('dashboard') ?>">
                         <i class="fas fa-chart-line"></i>
-                        <span>Dashboard</span>
+                        <span>Inicio</span>
                     </a>
                 </div>
 
@@ -42,10 +45,6 @@
                         <i class="fas fa-user-tie"></i>
                         <span>Clientes</span>
                     </a>
-                    <a href="<?= url('empleado/index') ?>" class="nav-link <?= isActiveRoute('empleado') ?>">
-                        <i class="fas fa-users-cog"></i>
-                        <span>Empleados</span>
-                    </a>
                     <a href="<?= url('inmueble/index') ?>" class="nav-link <?= isActiveRoute('inmueble') ?>">
                         <i class="fas fa-map-marked-alt"></i>
                         <span>Inmuebles</span>
@@ -54,45 +53,16 @@
                         <i class="fas fa-drafting-compass"></i>
                         <span>Proyectos y Trabajos</span>
                     </a>
-                </div>
-
-                <div class="nav-section">
-                    <span class="nav-section-title">Finanzas</span>
-                    <a href="<?= url('transaccion/index') ?>" class="nav-link <?= isActiveRoute('transaccion') ?>">
-                        <i class="fas fa-money-bill-wave"></i>
-                        <span>Transacciones / Abonos</span>
-                    </a>
                     <a href="<?= url('valuo/index') ?>" class="nav-link <?= isActiveRoute('valuo') ?>">
                         <i class="fas fa-clipboard-check"></i>
-                        <span>Valuaciones (Avalúos)</span>
+                        <span>Avalúos</span>
                     </a>
                 </div>
-
                 <div class="nav-section">
-                    <span class="nav-section-title">Operaciones</span>
-                    <a href="<?= url('documento/index') ?>" class="nav-link <?= isActiveRoute('documento') ?>">
-                        <i class="fas fa-folder-open"></i>
-                        <span>Planos y Documentos</span>
-                    </a>
-                    <a href="<?= url('asistencia/index') ?>" class="nav-link <?= isActiveRoute('asistencia') ?>">
-                        <i class="fas fa-user-clock"></i>
-                        <span>Control Asistencia</span>
-                    </a>
+                    <span class="nav-section-title">Personal</span>
+                    <a href="<?= url('empleado/index') ?>" class="nav-link <?= isActiveRoute('empleado') ?>"><i class="fas fa-users-cog"></i><span>Empleados</span></a>
+                    <a href="<?= url('usuario/index') ?>" class="nav-link <?= isActiveRoute('usuario') ?>"><i class="fas fa-user-shield"></i><span>Usuarios</span></a>
                 </div>
-
-                <?php if (\Core\Session::isAdmin()): ?>
-                <div class="nav-section">
-                    <span class="nav-section-title">Administración</span>
-                    <a href="<?= url('usuario/index') ?>" class="nav-link <?= isActiveRoute('usuario') ?>">
-                        <i class="fas fa-user-shield"></i>
-                        <span>Usuarios y Roles</span>
-                    </a>
-                    <a href="<?= url('backup/index') ?>" class="nav-link <?= isActiveRoute('backup') ?>">
-                        <i class="fas fa-database"></i>
-                        <span>Copias de Seguridad</span>
-                    </a>
-                </div>
-                <?php endif; ?>
             </nav>
 
             <div class="sidebar-footer">
@@ -119,7 +89,7 @@
                     <i class="fas fa-bars"></i>
                 </button>
                 <div class="topbar-title">
-                    <h1><?= e($pageTitle ?? 'Dashboard') ?></h1>
+                    <h1><?= e($pageTitle ?? 'Panel Principal') ?></h1>
                 </div>
                 <div class="topbar-actions">
                     <span class="topbar-date">
@@ -171,6 +141,9 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
+    <!-- Scripts -->
+    <script src="<?= asset('js/flatpickr.min.js') ?>"></script>
+    <script src="<?= asset('js/flatpickr-es.js') ?>"></script>
     <script src="<?= asset('js/app.js') ?>"></script>
     <?php if (isset($pageScript)): ?>
         <script src="<?= asset("js/modules/{$pageScript}.js") ?>"></script>
