@@ -37,7 +37,7 @@ class InmuebleController extends Controller
 
         $this->view('inmuebles/index', [
             'pageTitle'  => 'Gestión de Inmuebles',
-            'pageScript' => 'clientes',
+            'pageScript' => 'inmuebles',
             'inmuebles'  => $inmuebles,
             'clientes'   => $clientes,
         ]);
@@ -64,12 +64,17 @@ class InmuebleController extends Controller
         $data = $this->allInput();
         unset($data['_csrf_token']);
 
+        // Limpiar matrícula: solo permitir números
+        if (!empty($data['matricula'])) {
+            $data['matricula'] = preg_replace('/\D/', '', (string) $data['matricula']);
+        }
+
         $validator = new Validator($data);
         if (!$validator->validate([
             'id_cliente'    => 'required|numeric',
-            'matricula'     => 'required|max:30|unique:inmuebles',
+            'matricula'     => 'required|matricula|unique:inmuebles',
             'direccion'     => 'required',
-            'area'          => 'decimal',
+            'area'          => 'required|decimal',
             'tipo_inmueble' => 'required|max:30',
         ])) {
             Session::flash('error', $validator->firstError());
@@ -111,12 +116,17 @@ class InmuebleController extends Controller
         $data = $this->allInput();
         unset($data['_csrf_token']);
 
+        // Limpiar matrícula: solo permitir números
+        if (!empty($data['matricula'])) {
+            $data['matricula'] = preg_replace('/\D/', '', (string) $data['matricula']);
+        }
+
         $validator = new Validator($data);
         if (!$validator->validate([
             'id_cliente'    => 'required|numeric',
-            'matricula'     => "required|max:30|unique:inmuebles,{$id}",
+            'matricula'     => "required|matricula|unique:inmuebles,{$id}",
             'direccion'     => 'required',
-            'area'          => 'decimal',
+            'area'          => 'required|decimal',
             'tipo_inmueble' => 'required|max:30',
         ])) {
             Session::flash('error', $validator->firstError());

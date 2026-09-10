@@ -8,10 +8,6 @@ use Core\Validator;
 use App\Models\Proyecto;
 use App\Models\Cliente;
 use App\Models\Inmueble;
-use App\Models\Empleado;
-use App\Models\Transaccion;
-use App\Models\Valuo;
-use App\Models\Documento;
 
 /**
  * Controlador de Proyectos
@@ -158,19 +154,13 @@ class ProyectoController extends Controller
             return;
         }
 
-        $empleados     = $this->model->getEmpleados($id);
-        $transacciones = (new Transaccion())->getByProyecto($id);
-        $valuaciones   = (new Valuo())->getByProyecto($id);
-        $documentos    = (new Documento())->getByProyecto($id);
+        $empleados = $this->model->getEmpleados($id);
 
         $this->view('proyectos/detalle', [
             'pageTitle'     => $proyecto['nombre_del_proyecto'],
             'pageScript'    => 'proyectos',
             'proyecto'      => $proyecto,
             'empleados'     => $empleados,
-            'transacciones' => $transacciones,
-            'valuaciones'   => $valuaciones,
-            'documentos'    => $documentos,
         ]);
     }
 

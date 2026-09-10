@@ -5,43 +5,35 @@ namespace App\Controllers;
 use Core\Controller;
 use App\Models\Proyecto;
 use App\Models\Cliente;
-use App\Models\Empleado;
-use App\Models\Transaccion;
+use App\Models\Inmueble;
 
 /**
- * Controlador del Dashboard
+ * Controlador del Panel Principal
  */
 class DashboardController extends Controller
 {
     public function index(): void
     {
-        $proyectoModel     = new Proyecto();
-        $clienteModel      = new Cliente();
-        $empleadoModel     = new Empleado();
-        $transaccionModel  = new Transaccion();
+        $proyectoModel  = new Proyecto();
+        $clienteModel   = new Cliente();
+        $inmuebleModel  = new Inmueble();
 
         // KPIs
         $totalProyectos   = $proyectoModel->count();
         $totalClientes    = $clienteModel->count();
-        $totalEmpleados   = $empleadoModel->count('estado', 'Activo');
-        $totalIngresos    = $transaccionModel->totalIngresos();
+        $totalInmuebles   = $inmuebleModel->count();
         $totalPresupuesto = $proyectoModel->totalPresupuestos();
         $estadosProyecto  = $proyectoModel->countByEstado();
         $proyectosRecientes = $proyectoModel->recent(5);
 
-        // Ingresos por mes del año actual
-        $ingresosMensuales = $transaccionModel->ingresosPorMes((int) date('Y'));
-
         $this->view('dashboard/index', [
-            'pageTitle'          => 'Dashboard',
+            'pageTitle'          => 'Panel Principal',
             'totalProyectos'     => $totalProyectos,
             'totalClientes'      => $totalClientes,
-            'totalEmpleados'     => $totalEmpleados,
-            'totalIngresos'      => $totalIngresos,
+            'totalInmuebles'     => $totalInmuebles,
             'totalPresupuesto'   => $totalPresupuesto,
             'estadosProyecto'    => $estadosProyecto,
             'proyectosRecientes' => $proyectosRecientes,
-            'ingresosMensuales'  => $ingresosMensuales,
         ]);
     }
 }

@@ -24,7 +24,7 @@
         <div class="form-card-body">
             <div class="form-group">
                 <label for="id_cliente">
-                    <i class="fas fa-user-tie"></i> Propietario (Cliente)
+                    <i class="fas fa-user-tie"></i> Propietario (Cliente) <span class="required-mark">*</span>
                 </label>
                 <select id="id_cliente" name="id_cliente" class="form-control" required>
                     <option value="">Seleccione un cliente</option>
@@ -39,15 +39,17 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="matricula">
-                        <i class="fas fa-hashtag"></i> Matrícula
+                        <i class="fas fa-hashtag"></i> Matrícula (8 números) <span class="required-mark">*</span>
                     </label>
                     <input type="text" id="matricula" name="matricula" class="form-control" 
-                           value="<?= e($inmueble['matricula'] ?? '') ?>" required maxlength="30"
-                           placeholder="Matrícula catastral">
+                           value="<?= e($inmueble['matricula'] ?? '') ?>" required maxlength="8"
+                           placeholder="12345678" data-mask="matricula" inputmode="numeric"
+                           pattern="\d{8}" title="La matrícula debe contener exactamente 8 números" autocomplete="off">
+                    <small class="field-hint" id="matriculaHint"><i class="fas fa-fingerprint"></i> Solo 8 números (sin letras ni guiones)</small>
                 </div>
                 <div class="form-group">
                     <label for="tipo_inmueble">
-                        <i class="fas fa-home"></i> Tipo de Inmueble
+                        <i class="fas fa-home"></i> Tipo de Inmueble <span class="required-mark">*</span>
                     </label>
                     <select id="tipo_inmueble" name="tipo_inmueble" class="form-control" required>
                         <option value="">Seleccione</option>
@@ -60,22 +62,22 @@
 
             <div class="form-group">
                 <label for="area">
-                    <i class="fas fa-ruler-combined"></i> Área (m²)
+                    <i class="fas fa-ruler-combined"></i> Área (m²) <span class="required-mark">*</span>
                 </label>
                 <div class="input-with-addon">
                     <span class="input-addon">m²</span>
                     <input type="number" id="area" name="area" class="form-control" 
-                           value="<?= e($inmueble['area'] ?? '') ?>" step="0.01" min="0"
+                           value="<?= e($inmueble['area'] ?? '') ?>" required step="0.01" min="0"
                            placeholder="0.00">
                 </div>
             </div>
 
             <div class="form-group">
                 <label for="direccion">
-                    <i class="fas fa-map-marker-alt"></i> Dirección
+                    <i class="fas fa-map-marker-alt"></i> Dirección <span class="required-mark">*</span>
                 </label>
                 <textarea id="direccion" name="direccion" class="form-control" rows="3" required
-                          placeholder="Dirección del inmueble"><?= e($inmueble['direccion'] ?? '') ?></textarea>
+                          placeholder="Dirección completa del inmueble"><?= e($inmueble['direccion'] ?? '') ?></textarea>
             </div>
         </div>
 

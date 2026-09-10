@@ -20,14 +20,10 @@ class Proyecto extends Model
         $sql = "SELECT p.*, 
                        c.nombre as nombre_cliente,
                        i.direccion as direccion_inmueble,
-                       i.tipo_inmueble,
-                       COALESCE(SUM(t.monto_abonado), 0) as total_abonado,
-                       (p.presupuesto_inicial - COALESCE(SUM(t.monto_abonado), 0)) as saldo_pendiente
+                       i.tipo_inmueble
                 FROM proyectos p
                 LEFT JOIN clientes c ON p.id_cliente = c.id_cliente
                 LEFT JOIN inmuebles i ON p.id_inmueble = i.id_inmueble
-                LEFT JOIN transacciones t ON p.id_proyecto = t.id_proyecto
-                GROUP BY p.id_proyecto
                 ORDER BY p.fecha_de_inicio DESC";
         return $this->db->query($sql)->fetchAll();
     }
@@ -39,15 +35,11 @@ class Proyecto extends Model
     {
         $sql = "SELECT p.*, 
                        c.nombre as nombre_cliente, c.telefono as telefono_cliente, c.correo_electronico,
-                       i.matricula, i.direccion as direccion_inmueble, i.area, i.tipo_inmueble,
-                       COALESCE(SUM(t.monto_abonado), 0) as total_abonado,
-                       (p.presupuesto_inicial - COALESCE(SUM(t.monto_abonado), 0)) as saldo_pendiente
+                       i.matricula, i.direccion as direccion_inmueble, i.area, i.tipo_inmueble
                 FROM proyectos p
                 LEFT JOIN clientes c ON p.id_cliente = c.id_cliente
                 LEFT JOIN inmuebles i ON p.id_inmueble = i.id_inmueble
-                LEFT JOIN transacciones t ON p.id_proyecto = t.id_proyecto
-                WHERE p.id_proyecto = :id
-                GROUP BY p.id_proyecto";
+                WHERE p.id_proyecto = :id";
         return $this->db->query($sql, [':id' => $id])->fetch();
     }
 

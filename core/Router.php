@@ -22,13 +22,9 @@ class Router
         $url = $this->parseUrl();
 
         if (empty($url)) {
-            if (Session::isAuthenticated()) {
-                $controllerName = 'DashboardController';
-                $action = 'index';
-            } else {
-                $controllerName = 'AuthController';
-                $action = 'login';
-            }
+            // Sin login — ir directo al dashboard
+            $controllerName = 'DashboardController';
+            $action = 'index';
         } else {
             $controllerName = ucfirst($url[0]) . 'Controller';
             $action         = $url[1] ?? 'index';
@@ -52,22 +48,20 @@ class Router
             return;
         }
 
-        // Verificar autenticación (excepto para AuthController)
-        if ($controllerName !== 'AuthController') {
-            if (!Session::isAuthenticated()) {
-                $this->redirect('auth/login');
-                return;
-            }
-
-            // Verificar permisos de rol si el controlador lo requiere
-            if (method_exists($controller, 'getRequiredRole')) {
-                $requiredRole = $controller->getRequiredRole($action);
-                if ($requiredRole && !Session::hasRole($requiredRole)) {
-                    $this->handleError(403, "No tienes permisos para acceder a esta sección");
-                    return;
-                }
-            }
-        }
+        // Verificar autenticación (DESACTIVADO para sprint backlog)
+        // if ($controllerName !== 'AuthController') {
+        //     if (!Session::isAuthenticated()) {
+        //         $this->redirect('auth/login');
+        //         return;
+        //     }
+        //     if (method_exists($controller, 'getRequiredRole')) {
+        //         $requiredRole = $controller->getRequiredRole($action);
+        //         if ($requiredRole && !Session::hasRole($requiredRole)) {
+        //             $this->handleError(403, "No tienes permisos para acceder a esta sección");
+        //             return;
+        //         }
+        //     }
+        // }
 
         // Ejecutar la acción del controlador
         call_user_func_array([$controller, $action], $params);

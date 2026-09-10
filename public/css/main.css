@@ -1682,3 +1682,123 @@ textarea.form-control {
         width: 100%;
     }
 }
+
+/* ─── Interactive Validation States & Hints ─────────────────── */
+.form-control.is-valid {
+    border-color: #166534 !important;
+    background-color: #f0fdf4 !important;
+    box-shadow: 0 0 0 3px rgba(22, 101, 52, 0.12) !important;
+}
+
+.form-control.is-invalid {
+    border-color: #dc2626 !important;
+    background-color: #fef2f2 !important;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12) !important;
+}
+
+.field-hint {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-size: var(--text-xs);
+    color: var(--gray-500);
+    margin-top: var(--space-1);
+    transition: color var(--transition-fast);
+}
+
+.field-hint i {
+    font-size: 0.8rem;
+}
+
+/* ─── Flatpickr Custom Theme (TOPSA Forest Green & Gold) ──── */
+.flatpickr-calendar {
+    font-family: var(--font-body) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-xl) !important;
+    border: 1px solid var(--gray-300) !important;
+    background: #fff !important;
+    overflow: hidden;
+}
+
+.flatpickr-months {
+    background: var(--primary-700) !important;
+    padding: var(--space-2) 0 !important;
+}
+
+.flatpickr-month {
+    color: #fff !important;
+    fill: #fff !important;
+}
+
+.flatpickr-current-month {
+    font-weight: 700 !important;
+    font-size: var(--text-base) !important;
+    color: #fff !important;
+}
+
+.flatpickr-current-month .numInputWrapper span.arrowUp:after {
+    border-bottom-color: #fff !important;
+}
+
+.flatpickr-current-month .numInputWrapper span.arrowDown:after {
+    border-top-color: #fff !important;
+}
+
+.flatpickr-months .flatpickr-prev-month,
+.flatpickr-months .flatpickr-next-month {
+    color: #fff !important;
+    fill: #fff !important;
+}
+
+.flatpickr-months .flatpickr-prev-month:hover,
+.flatpickr-months .flatpickr-next-month:hover {
+    color: var(--accent-400) !important;
+}
+
+span.flatpickr-weekday {
+    background: var(--primary-800) !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-weight: 600 !important;
+    font-size: var(--text-xs) !important;
+}
+
+.flatpickr-day {
+    border-radius: var(--radius-md) !important;
+    font-weight: 500 !important;
+    color: var(--gray-800) !important;
+    transition: all var(--transition-fast) !important;
+}
+
+.flatpickr-day:hover {
+    background: var(--primary-50) !important;
+    border-color: var(--primary-300) !important;
+    color: var(--primary-800) !important;
+}
+
+.flatpickr-day.today {
+    border-color: var(--accent-500) !important;
+    background: var(--accent-100) !important;
+    color: var(--accent-800) !important;
+    font-weight: 700 !important;
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange {
+    background: var(--primary-600) !important;
+    border-color: var(--primary-600) !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 8px rgba(29, 70, 35, 0.35) !important;
+}
+
+.datepicker-trigger {
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.datepicker-trigger:hover {
+    background: var(--primary-100);
+    color: var(--primary-700);
+}
+

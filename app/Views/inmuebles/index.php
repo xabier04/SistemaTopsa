@@ -18,9 +18,16 @@
     </div>
 </div>
 
+<div class="filter-bar">
+    <div class="search-input">
+        <i class="fas fa-search"></i>
+        <input type="text" class="form-control" id="searchInmuebles" placeholder="Buscar por matrícula, cliente o dirección...">
+    </div>
+</div>
+
 <div class="card">
     <div class="table-container">
-        <table class="table">
+        <table class="table" id="tablaInmuebles">
             <thead>
                 <tr>
                     <th>#</th>
@@ -35,7 +42,7 @@
             <tbody>
                 <?php if (!empty($inmuebles)): ?>
                     <?php foreach ($inmuebles as $i => $inm): ?>
-                        <tr>
+                        <tr data-id="<?= $inm['id_inmueble'] ?>">
                             <td><?= $i + 1 ?></td>
                             <td class="fw-600"><span class="cell-icon-text"><i class="fas fa-hashtag"></i> <?= e($inm['matricula']) ?></span></td>
                             <td><?= e($inm['nombre_cliente'] ?? '—') ?></td>

@@ -67,12 +67,27 @@ class ClienteController extends Controller
         $data = $this->allInput();
         unset($data['_csrf_token']);
 
+        // Normalizar DUI y Teléfono si vienen en números planos
+        if (!empty($data['dui'])) {
+            $duiDigits = preg_replace('/\D/', '', (string) $data['dui']);
+            if (strlen($duiDigits) === 9 && !str_contains((string) $data['dui'], '-')) {
+                $data['dui'] = substr($duiDigits, 0, 8) . '-' . substr($duiDigits, 8, 1);
+            }
+        }
+        if (!empty($data['telefono'])) {
+            $telDigits = preg_replace('/\D/', '', (string) $data['telefono']);
+            if (strlen($telDigits) === 8 && !str_contains((string) $data['telefono'], '-')) {
+                $data['telefono'] = substr($telDigits, 0, 4) . '-' . substr($telDigits, 4, 4);
+            }
+        }
+
         $validator = new Validator($data);
         if (!$validator->validate([
-            'nombre'   => 'required|max:90',
-            'dui'      => 'required|dui|unique:clientes',
-            'telefono' => 'phone',
-            'correo_electronico' => 'email|max:50',
+            'nombre'             => 'required|max:90',
+            'dui'                => 'required|dui|unique:clientes',
+            'telefono'           => 'required|phone',
+            'correo_electronico' => 'required|email|max:50',
+            'direccion'          => 'required',
         ])) {
             Session::flash('error', $validator->firstError());
             $this->redirect('cliente/create');
@@ -117,12 +132,27 @@ class ClienteController extends Controller
         $data = $this->allInput();
         unset($data['_csrf_token']);
 
+        // Normalizar DUI y Teléfono si vienen en números planos
+        if (!empty($data['dui'])) {
+            $duiDigits = preg_replace('/\D/', '', (string) $data['dui']);
+            if (strlen($duiDigits) === 9 && !str_contains((string) $data['dui'], '-')) {
+                $data['dui'] = substr($duiDigits, 0, 8) . '-' . substr($duiDigits, 8, 1);
+            }
+        }
+        if (!empty($data['telefono'])) {
+            $telDigits = preg_replace('/\D/', '', (string) $data['telefono']);
+            if (strlen($telDigits) === 8 && !str_contains((string) $data['telefono'], '-')) {
+                $data['telefono'] = substr($telDigits, 0, 4) . '-' . substr($telDigits, 4, 4);
+            }
+        }
+
         $validator = new Validator($data);
         if (!$validator->validate([
-            'nombre'   => 'required|max:90',
-            'dui'      => "required|dui|unique:clientes,{$id}",
-            'telefono' => 'phone',
-            'correo_electronico' => 'email|max:50',
+            'nombre'             => 'required|max:90',
+            'dui'                => "required|dui|unique:clientes,{$id}",
+            'telefono'           => 'required|phone',
+            'correo_electronico' => 'required|email|max:50',
+            'direccion'          => 'required',
         ])) {
             Session::flash('error', $validator->firstError());
             $this->redirect("cliente/edit/{$id}");
