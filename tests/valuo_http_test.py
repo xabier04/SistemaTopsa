@@ -8,6 +8,9 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import uuid
+import io
+import zipfile
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -86,7 +89,18 @@ try:
     assert status == 200 and body == png
     status, body, _ = request(f'/valuo/report/{created}')
     assert status == 200 and b'Comparable 3' in body and b'$60,324.57' in body and b'Imagen de prueba' in body
-    print('OK: CSRF, cálculo HTTP, revisión, alta, validación sin pérdida, edición, concurrencia, anexo y reporte.')
+    assert b'logo-topsa.jpg' in body and b'Exportar a Excel' in body
+    response = opener.open(BASE + f'/valuo/excel/{created}')
+    assert response.headers['Content-Type'] == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    assert '.xlsx' in response.headers['Content-Disposition']
+    with zipfile.ZipFile(io.BytesIO(response.read())) as book:
+        assert book.testzip() is None
+        for name in book.namelist():
+            ET.fromstring(book.read(name))
+        summary = book.read('xl/worksheets/sheet1.xml')
+        assert b'<v>62000</v>' in summary and b'<v>31000</v>' in summary
+        assert b'prueba.png' in book.read('xl/worksheets/sheet2.xml')
+    print('OK: flujo HTTP completo, logo, descarga XLSX, estructura XML, anexos y valores guardados.')
 finally:
     if created is not None:
         php(r'''

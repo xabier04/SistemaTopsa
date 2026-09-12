@@ -123,6 +123,25 @@ class ValuoController extends Controller
         require dirname(__DIR__) . '/Views/valuos/report.php';
     }
 
+    public function excel(int $id = 0): void
+    {
+        $v = $this->buscar($id);
+        if (!$v['datos']) { $this->redirect('valuo/show/' . $id); }
+        try {
+            $bytes = \App\Models\ValuoExcel::generar($v, $this->model->anexos($id));
+        } catch (\Throwable $e) {
+            error_log('Excel de avalúo: ' . $e->getMessage());
+            Session::flash('error', 'No se pudo generar el Excel. Verifique que el servidor tenga habilitada la extensión ZIP de PHP.');
+            $this->redirect('valuo/show/' . $id);
+        }
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="avaluo-' . $id . '.xlsx"');
+        header('Content-Length: ' . strlen($bytes));
+        header('Cache-Control: private, no-store');
+        header('X-Content-Type-Options: nosniff');
+        echo $bytes;
+    }
+
     public function upload(int $id = 0): void
     {
         if (!$this->isPost() || !$this->validateCsrf()) { $this->redirect('valuo/show/' . $id); }
