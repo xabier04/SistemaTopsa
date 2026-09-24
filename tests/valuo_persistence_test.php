@@ -35,6 +35,12 @@ try {
     if (!str_contains($html, '$60,324.57') || str_contains($html, '<script>alert(1)</script>') || !str_contains($html, 'Comparable 3')) {
         throw new RuntimeException('El reporte no muestra los resultados o no escapa texto.');
     }
+    foreach (['I. Datos generales', 'II. Entorno del inmueble', 'III. Descripción del terreno',
+        'IV. Descripción de la construcción', 'V. Valor por el método del costo',
+        'VI. Valor por el método comparativo', 'VII. Análisis y conclusión',
+        'Sujeto', '51.9600', 'logo-topsa.jpg', '$61,000.00'] as $expected) {
+        if (!str_contains($html, $expected)) throw new RuntimeException('Falta contenido del informe técnico: ' . $expected);
+    }
     echo "OK: alta, lectura exacta, edición, conflicto concurrente, rollback y reporte escapado.\n";
 } finally {
     if ($id !== null) {

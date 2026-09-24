@@ -1,7 +1,7 @@
 <link rel="stylesheet" href="<?= asset('css/valuos.css') ?>">
 <div class="page-header"><h2><?= e($v['referencia'] ?? ('Avalúo #' . $v['id_valuo'])) ?></h2><a class="btn btn-outline" href="<?= url('valuo/index') ?>">Volver</a></div>
 <div class="avaluo-actions"><a class="btn btn-primary" href="<?= url('valuo/edit/' . $v['id_valuo']) ?>">Editar expediente</a>
-<?php if ($d): ?><a class="btn btn-outline" href="<?= url('valuo/report/' . $v['id_valuo']) ?>" target="_blank" rel="noopener">Ver informe / Guardar PDF</a><?php endif; ?>
+<?php if ($d): ?><a class="btn btn-outline" href="<?= url('valuo/report/' . $v['id_valuo']) ?>" target="_blank" rel="noopener">Ver informe / Guardar PDF</a><a class="btn btn-outline" href="<?= url('valuo/excel/' . $v['id_valuo']) ?>">Exportar a Excel</a><?php endif; ?>
 <a class="btn btn-outline" href="<?= url('proyecto/detalle/' . $v['id_proyecto']) ?>">Proyecto</a></div>
 <?php if (!$d): ?><section class="avaluo-section"><p>Registro anterior sin desglose. Monto registrado: <?= formatMoney($v['monto_estimado']) ?>. Edite para completar el expediente.</p></section><?php else: ?>
 <section class="avaluo-section"><p><strong><?= e($v['estado']) ?></strong> · <?= formatDate($v['fecha_del_valuo']) ?> · Revisión <?= (int) $v['revision'] ?></p>

@@ -1,11 +1,96 @@
-* { box-sizing:border-box; } body { margin:0; background:#e8edeb; color:#182823; font:13px/1.5 Arial,sans-serif; }
-main { max-width:1000px; margin:24px auto; background:white; padding:48px; } h1 { font-size:28px; } h2 { font-size:19px; border-bottom:1px solid #8b9c94; padding-bottom:8px; margin-top:28px; } h3 { font-size:15px; }
-header { border-bottom:3px solid #2d5746; padding-bottom:20px; } p,dd,td,dt { overflow-wrap:anywhere; }
-dl>div { display:grid; grid-template-columns:210px 1fr; gap:14px; padding:6px 0; border-bottom:1px solid #edf0ee; } dt { font-weight:bold; } dd { margin:0; white-space:normal; }
-table { width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px; margin:16px 0; } th,td { border:1px solid #b2bdb7; padding:7px; text-align:left; vertical-align:top; } th { background:#eef3f0; } thead { display:table-header-group; }
-.avaluo-results { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:20px 0; }.avaluo-results div { padding:12px; border:1px solid #ced9d2; }.avaluo-results strong { display:block; font-size:19px; }
-.report-tools { max-width:1000px; margin:24px auto; padding:12px; }.report-tools button,.report-tools a { margin-right:16px; padding:10px; }.report-notice { padding:12px; border:1px solid #a27e31; }
-figure { margin:24px 0; break-inside:avoid; } figure img { max-width:100%; max-height:750px; display:block; margin:auto; } figcaption { text-align:center; padding:10px; }.signature { margin-top:64px; text-align:center; } footer { margin-top:40px; font-size:10px; color:#57655e; }
-@page { size:A4; margin:16mm; }
-@media print { body { background:white; font-size:10pt; } main { margin:0; padding:0; max-width:none; } .report-tools { display:none; } h2,h3 { break-after:avoid; } tr,dl>div { break-inside:avoid; } .report-market,.report-homologacion,.report-conclusion { break-before:page; } table { font-size:8pt; } th,td { padding:5px; } .avaluo-results { break-inside:avoid; } figure img { max-height:220mm; } a { color:inherit; } }
-@media(max-width:650px) { main { padding:18px; } dl>div { grid-template-columns:1fr; gap:4px; } .avaluo-results { grid-template-columns:repeat(2,1fr); } }
+* { box-sizing:border-box; }
+body { margin:0; background:#e8ece9; color:#202b25; font:13px/1.5 Arial,sans-serif; }
+main { max-width:960px; margin:24px auto; padding:42px; background:white; box-shadow:0 4px 30px #203c2312; }
+p,dd,td,dt,h1,h2,h3,span,strong { overflow-wrap:anywhere; }
+h1 { margin:12px 0 8px; font:700 34px/1.2 Georgia,serif; color:#244c34; }
+h2 { margin:24px 0 12px; padding:8px 10px; border-top:2px solid #345d40; border-bottom:1px solid #aabdae; background:#f0f4ef; font-size:15px; color:#244c34; }
+h3 { font-size:13px; color:#244c34; margin:20px 0 9px; }
+p { margin:10px 0; } .muted,.table-note { color:#59675d; }
+.report-cover { padding:28px 36px 20px; border:1px solid #47634c; outline:3px double #bcc8be; outline-offset:5px; text-align:center; }
+.report-brand { display:flex; align-items:center; justify-content:space-between; gap:20px; padding-bottom:18px; border-bottom:2px solid #345d40; }
+.report-brand img { width:210px; max-width:48%; height:auto; }
+.report-brand p { font-size:11px; font-weight:bold; letter-spacing:1.3px; text-align:right; }
+.cover-recipient { margin:22px 0; }
+.cover-recipient span,.cover-author>span { color:#526750; font-size:10px; letter-spacing:1px; font-weight:bold; }
+.cover-recipient p { font-weight:bold; font-size:14px; margin:7px 0 0; }
+.report-eyebrow { margin:24px 0 0; letter-spacing:1.4px; font-size:11px; font-weight:bold; }
+.cover-type { font-size:14px; margin:0 0 16px; }
+.cover-reference { padding:8px; background:#f0f4ef; border-block:1px solid #cbd6cb; }
+.cover-purpose { border:1px solid #b7c5b7; margin:18px 0; padding:14px; }
+.cover-purpose h2 { background:none; padding:0; border:0; margin:0 0 8px; font-size:12px; text-transform:uppercase; }
+.cover-purpose p { margin:6px 0; }
+.cover-methods { font-size:11px; font-weight:bold; padding-top:8px; }
+dl { margin:0; } dl>div { display:grid; grid-template-columns:180px minmax(0,1fr); gap:12px; border-bottom:1px solid #d9e1d9; padding:6px 8px; }
+dt { font-weight:bold; } dd { margin:0; }
+.cover-details { text-align:left; font-size:12px; border:1px solid #b7c5b7; }
+.cover-details>div:last-child { border-bottom:0; }
+.cover-author { margin:20px 0 12px; }
+.cover-author p { margin:6px 0; } .cover-status { font-size:10px; padding-top:10px; border-top:1px solid #bdcbbf; color:#526750; }
+.report-body { padding-top:32px; }
+.document-heading { display:flex; justify-content:space-between; gap:20px; padding:9px 0; border-bottom:1px solid #728d77; font-size:10px; color:#436049; }
+.document-heading span { text-align:right; }
+.technical-fields { font-size:12px; } .technical-fields dt { color:#435847; }
+.report-chapter { margin-top:36px; }
+table { border-collapse:collapse; width:100%; table-layout:fixed; font-size:11px; margin:12px 0; }
+caption { text-align:left; font-weight:bold; color:#244c34; padding:6px 0; }
+th,td { border:1px solid #acbbae; padding:7px 6px; vertical-align:top; text-align:left; }
+th { font-weight:bold; background:#f0f4ef; } thead th { color:#fff; background:#345d40; font-weight:bold; }
+thead { display:table-header-group; }
+.numeric { text-align:right; font-variant-numeric:tabular-nums; }
+.total-row th,.total-row td { background:#e8efe5; font-weight:bold; border-block:2px solid #527257; }
+.valuation-summary td:last-child { text-align:right; font-variant-numeric:tabular-nums; }
+.valuation-summary th:first-child { width:60%; }
+.factor-table { font-size:9px; } .factor-table th,.factor-table td { text-align:center; padding:5px 2px; }
+.construction-table th:first-child { width:22%; }
+.market-label { width:24%; }
+.market-table td { font-size:10px; }
+.market-table .subject-col { background:#edf2e8; color:#24382b; }
+.table-note { font-size:10px; margin:6px 0 12px; }
+.calculation-note { border-left:3px solid #698869; background:#f5f7f3; padding:10px 12px; font-size:11px; }
+.report-homologacion { margin-top:20px; }
+.conclusion-text { margin:16px 0 24px; }
+.signature { max-width:380px; margin:65px auto 20px; text-align:center; }
+.signature-line { border-top:1px solid #5c6f60; margin-bottom:12px; }
+.signature p { font-size:11px; color:#59675d; }
+.annex-number { width:12%; } .annex-format { width:20%; }
+.annex-sheet { margin-top:26px; } figure { margin:12px 0 24px; border:1px solid #b7c5b7; padding:12px; }
+figure img { display:block; max-width:100%; max-height:660px; width:auto; height:auto; margin:auto; object-fit:contain; }
+figcaption { text-align:center; padding-top:10px; font-size:11px; color:#435847; }
+.report-notice { border:1px solid #a58641; padding:10px; color:#6c5521; background:#fffaf0; font-size:11px; }
+footer { border-top:1px solid #47634c; margin-top:32px; padding:12px 0; font-size:10px; color:#59675d; }
+.report-tools { max-width:960px; margin:24px auto; padding:12px; display:flex; flex-wrap:wrap; gap:12px; align-items:center; }
+.report-tools a,.report-tools button { padding:10px 16px; border:1px solid #345d40; border-radius:4px; color:#345d40; background:white; font:inherit; text-decoration:none; cursor:pointer; }
+.report-tools button { background:#345d40; color:white; } .report-tools p { margin:0; width:100%; font-size:12px; }
+@page { size:A4; margin:18mm 16mm;
+ @top-left { content:"TOPSA | INFORME TÉCNICO DE AVALÚO"; font:7pt Arial,sans-serif; color:#526750; }
+ @bottom-right { content:"Página " counter(page) " de " counter(pages); font:8pt Arial,sans-serif; color:#526750; }
+}
+@page :first { @top-left { content:none; } }
+@media print {
+ body { background:white; font-size:9pt; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+ main { padding:0; margin:0; max-width:none; box-shadow:none; }
+ .report-tools { display:none; }
+ .report-cover { padding:7mm 8mm 5mm; margin:2mm; break-after:page; }
+ .report-brand img { width:52mm; } h1 { font-size:26pt; }
+ .cover-recipient { margin:6mm 0; } .cover-purpose { margin:5mm 0; }
+ .cover-author { margin-top:6mm; } .cover-details { font-size:9pt; }
+ .report-body { padding:0; } .report-chapter { break-before:page; margin-top:0; }
+ h2 { font-size:11pt; margin:16px 0 9px; } h3 { font-size:10pt; margin:15px 0 8px; }
+ h2,h3,caption,.document-heading { break-after:avoid; }
+ .technical-fields { font-size:8.5pt; } dl>div { padding:4px 6px; }
+ tr,dl>div,.calculation-note,.signature { break-inside:avoid; } p { orphans:3; widows:3; }
+ table { font-size:8pt; } th,td { padding:5px; }
+ .market-table td { font-size:7.5pt; } .factor-table { font-size:7pt; }
+ .report-homologacion { margin-top:18px; }
+ .signature { margin-top:28mm; } .valuation-summary { break-inside:avoid; }
+ .annex-sheet { break-before:page; margin-top:0; } figure { break-inside:avoid; }
+ .report-annexes>table + .annex-sheet { break-before:auto; }
+ figure img { max-height:195mm; }
+ a { color:inherit; text-decoration:none; }
+}
+@media screen and (max-width:650px) {
+ main { padding:20px; } .report-cover { padding:16px; } .report-brand p { font-size:8px; }
+ h1 { font-size:28px; } dl>div { grid-template-columns:1fr; gap:3px; }
+ .document-heading { flex-direction:column; gap:4px; } .document-heading span { text-align:left; }
+ th,td { padding:4px 3px; } .market-table td { font-size:9px; }
+}

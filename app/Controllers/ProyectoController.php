@@ -63,8 +63,7 @@ class ProyectoController extends Controller
             return;
         }
 
-        $data = $this->allInput();
-        unset($data['_csrf_token']);
+        $data = array_intersect_key($this->allInput(), array_flip(['id_cliente', 'id_inmueble', 'nombre_del_proyecto', 'fecha_de_inicio', 'estado_del_proyecto', 'presupuesto_inicial']));
 
         $validator = new Validator($data);
         if (!$validator->validate([
@@ -75,6 +74,13 @@ class ProyectoController extends Controller
             'presupuesto_inicial'  => 'required|numeric',
         ])) {
             Session::flash('error', $validator->firstError());
+            $this->redirect('proyecto/create');
+            return;
+        }
+
+        if (!preg_match('/^\d{1,8}(?:\.\d{1,2})?$/D', (string) $data['presupuesto_inicial'])
+            || !(new Cliente())->find((int) $data['id_cliente'])) {
+            Session::flash('error', 'Seleccione un cliente válido y un presupuesto no negativo con hasta dos decimales.');
             $this->redirect('proyecto/create');
             return;
         }
@@ -126,8 +132,7 @@ class ProyectoController extends Controller
             return;
         }
 
-        $data = $this->allInput();
-        unset($data['_csrf_token']);
+        $data = array_intersect_key($this->allInput(), array_flip(['id_cliente', 'id_inmueble', 'nombre_del_proyecto', 'fecha_de_inicio', 'estado_del_proyecto', 'presupuesto_inicial']));
 
         $validator = new Validator($data);
         if (!$validator->validate([
@@ -138,6 +143,13 @@ class ProyectoController extends Controller
             'presupuesto_inicial'  => 'required|numeric',
         ])) {
             Session::flash('error', $validator->firstError());
+            $this->redirect("proyecto/edit/{$id}");
+            return;
+        }
+
+        if (!preg_match('/^\d{1,8}(?:\.\d{1,2})?$/D', (string) $data['presupuesto_inicial'])
+            || !(new Cliente())->find((int) $data['id_cliente'])) {
+            Session::flash('error', 'Seleccione un cliente válido y un presupuesto no negativo con hasta dos decimales.');
             $this->redirect("proyecto/edit/{$id}");
             return;
         }
@@ -154,7 +166,13 @@ class ProyectoController extends Controller
             }
         }
 
-        $this->model->update($id, $data);
+        try {
+            $this->model->actualizarConPagos($id, $data);
+        } catch (\DomainException $e) {
+            Session::flash('error', $e->getMessage());
+            $this->redirect("proyecto/edit/{$id}");
+            return;
+        }
         $this->logActivity('Actualizó proyecto: ' . $data['nombre_del_proyecto'], 'proyectos', $id);
         Session::flash('success', 'Proyecto actualizado exitosamente.');
         $this->redirect('proyecto/index');
@@ -179,6 +197,7 @@ class ProyectoController extends Controller
             'pageScript'    => 'proyectos',
             'proyecto'      => $proyecto,
             'empleados'     => $empleados,
+            'disponibles' => (new \App\Models\Empleado())->where('estado', 'Activo'),
         ]);
     }
 
@@ -187,45 +206,44 @@ class ProyectoController extends Controller
      */
     public function asignarEmpleado(): void
     {
-        if (!$this->isPost() || !\Core\Router::isAjax()) {
-            $this->json(['success' => false, 'message' => 'Petición inválida.'], 400);
-            return;
+        if (!$this->isPost() || !$this->validateCsrf()) {
+            http_response_code(400); echo 'Petición inválida.'; return;
         }
-
-        $idProyecto  = (int) $this->input('id_proyecto', 0);
-        $idEmpleado  = (int) $this->input('id_empleado', 0);
-
-        if ($idProyecto === 0 || $idEmpleado === 0) {
-            $this->json(['success' => false, 'message' => 'Datos incompletos.'], 400);
-            return;
-        }
-
-        $this->model->asignarEmpleado($idProyecto, $idEmpleado);
-        $this->logActivity('Asignó empleado a proyecto', 'proyecto_empleado');
-        $this->json(['success' => true, 'message' => 'Empleado asignado exitosamente.']);
-    }
-
-    /**
-     * Desasignar empleado de proyecto (AJAX)
-     */
-    public function desasignarEmpleado(): void
-    {
-        if (!$this->isPost() || !\Core\Router::isAjax()) {
-            $this->json(['success' => false, 'message' => 'Petición inválida.'], 400);
-            return;
-        }
-
         $idProyecto = (int) $this->input('id_proyecto', 0);
         $idEmpleado = (int) $this->input('id_empleado', 0);
+        $proyecto = $this->model->find($idProyecto);
+        $empleado = (new \App\Models\Empleado())->find($idEmpleado);
+        if (!$proyecto || $proyecto['estado_del_proyecto'] === 'Finalizado' || !$empleado || $empleado['estado'] !== 'Activo') {
+            Session::flash('error', 'Seleccione un proyecto sin finalizar y un empleado activo.');
+        } else {
+            $this->model->asignarEmpleado($idProyecto, $idEmpleado);
+            $this->logActivity('Asignó empleado a proyecto', 'proyecto_empleado', $idProyecto);
+            Session::flash('success', 'Empleado asignado correctamente.');
+        }
+        $this->redirect("proyecto/detalle/{$idProyecto}");
+    }
 
-        $this->model->desasignarEmpleado($idProyecto, $idEmpleado);
-        $this->logActivity('Desasignó empleado de proyecto', 'proyecto_empleado');
-        $this->json(['success' => true, 'message' => 'Empleado desasignado.']);
+    public function desasignarEmpleado(): void
+    {
+        if (!$this->isPost() || !$this->validateCsrf()) {
+            http_response_code(400); echo 'Petición inválida.'; return;
+        }
+        $idProyecto = (int) $this->input('id_proyecto', 0);
+        $idEmpleado = (int) $this->input('id_empleado', 0);
+        try {
+            $this->model->desasignarEmpleado($idProyecto, $idEmpleado);
+            $this->logActivity('Desasignó empleado de proyecto', 'proyecto_empleado', $idProyecto);
+            Session::flash('success', 'Empleado desasignado.');
+        } catch (\PDOException $e) {
+            if ($e->getCode() !== '23000') throw $e;
+            Session::flash('error', 'El empleado tiene tareas en este proyecto. Se conserva la asignación y su seguimiento.');
+        }
+        $this->redirect("proyecto/detalle/{$idProyecto}");
     }
 
     public function delete(int $id = 0): void
     {
-        if (!\Core\Router::isAjax()) {
+        if (!\Core\Router::isAjax() || !$this->isPost() || !$this->validateCsrf()) {
             $this->redirect('proyecto/index');
             return;
         }

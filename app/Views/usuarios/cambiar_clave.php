@@ -11,7 +11,7 @@ $formErrors = $formState['errors'] ?? [];
             <?php require dirname(__DIR__) . '/partials/form_errors.php'; ?>
             <div class="form-group">
                 <label for="correo">Correo de la cuenta</label>
-                <input class="form-control" id="correo" type="email" name="correo" value="<?= e($formState['values']['correo'] ?? '') ?>" required autocomplete="username">
+                <input class="form-control" id="correo" type="email" name="correo" value="<?= e($currentUser['correo']) ?>" readonly autocomplete="username">
             </div>
             <div class="form-group">
                 <label for="actual">Contraseña actual o temporal</label>
@@ -19,12 +19,12 @@ $formErrors = $formState['errors'] ?? [];
             </div>
             <div class="form-group">
                 <label for="nueva">Nueva contraseña</label>
-                <input class="form-control" id="nueva" type="password" name="nueva" required minlength="12" maxlength="72" autocomplete="new-password">
-                <small class="field-hint">Use una frase de al menos 12 caracteres.</small>
+                <input class="form-control" id="nueva" type="password" name="nueva" required minlength="8" maxlength="72" autocomplete="new-password">
+                <small class="field-hint">Mínimo 8 caracteres.</small>
             </div>
             <div class="form-group">
                 <label for="confirmacion">Confirmar nueva contraseña</label>
-                <input class="form-control" id="confirmacion" type="password" name="confirmacion" required minlength="12" maxlength="72" autocomplete="new-password">
+                <input class="form-control" id="confirmacion" type="password" name="confirmacion" required minlength="8" maxlength="72" autocomplete="new-password">
             </div>
         </div>
         <div class="form-actions-toolbar"><button class="btn btn-primary" type="submit">Cambiar contraseña</button></div>

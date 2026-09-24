@@ -44,7 +44,7 @@
                     <th>Fecha de Pago</th>
                     <th>Monto Abonado</th>
                     <th>Tipo</th>
-                    <th>Saldo Pendiente</th>
+                    <th>Saldo al registrar</th><th>Comprobante</th>
                 </tr>
             </thead>
             <tbody>
@@ -62,11 +62,12 @@
                                     <?= formatMoney($t['saldo_pendiente']) ?>
                                 </span>
                             </td>
+                            <td><a class="btn btn-sm btn-outline" href="<?= url('transaccion/comprobante/' . $t['id_transaccion']) ?>">Ver / imprimir</a></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="7">
+                        <td colspan="8">
                             <div class="empty-state">
                                 <i class="fas fa-receipt"></i>
                                 <h3>Sin transacciones</h3>
@@ -79,3 +80,11 @@
         </table>
     </div>
 </div>
+
+<div class="card mt-6"><div class="card-header"><h3>Saldos actuales por cliente y proyecto</h3></div>
+<div class="card-body"><label for="buscarSaldo">Buscar cliente o proyecto</label><input id="buscarSaldo" class="form-control" type="search" placeholder="Escriba un nombre"></div>
+<div class="table-container"><table class="table"><thead><tr><th>Cliente</th><th>Proyecto</th><th>Presupuesto</th><th>Abonado</th><th>Saldo pendiente</th></tr></thead><tbody id="saldosBody">
+<?php foreach ($saldos as $s): ?><tr><td><?= e($s['nombre_cliente']) ?></td><td><?= e($s['nombre_del_proyecto']) ?></td><td><?= formatMoney($s['presupuesto_inicial']) ?></td><td><?= formatMoney($s['total_abonado']) ?></td><td><?= formatMoney($s['saldo_pendiente']) ?></td></tr><?php endforeach; ?>
+<?php if (!$saldos): ?><tr><td colspan="5">No hay proyectos registrados.</td></tr><?php endif; ?>
+</tbody></table></div></div>
+<script>document.getElementById('buscarSaldo').addEventListener('input', function () { document.querySelectorAll('#saldosBody tr').forEach(row => { row.hidden = !row.textContent.toLocaleLowerCase().includes(this.value.toLocaleLowerCase()); }); });</script>

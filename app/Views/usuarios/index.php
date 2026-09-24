@@ -1,3 +1,13 @@
+<?php if (!empty($recuperaciones)): ?>
+<div class="card"><div class="card-header"><h3>Solicitudes de recuperación</h3></div><div class="card-body">
+<p>Verifique la identidad del usuario antes de generar y entregarle una contraseña temporal.</p>
+<?php foreach ($recuperaciones as $r): ?>
+<form method="post" action="<?= url('usuario/regenerar/' . $r['id_usuario']) ?>" class="form-group">
+<?= csrf_field() ?><strong><?= e($r['nombre']) ?></strong> · <?= e($r['correo']) ?> · <?= e($r['solicitada_en']) ?>
+<button class="btn btn-primary" type="submit">Generar clave temporal</button>
+</form>
+<?php endforeach; ?></div></div>
+<?php endif; ?>
 <?php /** Vista: Gestión de Usuarios */ ?>
 
 <div class="page-header">
@@ -65,9 +75,14 @@
                             <td>
                                 <div class="table-actions">
                                     <a href="<?= url("usuario/edit/{$u['id_usuario']}") ?>" class="btn-action act-edit" title="Editar"><i class="fas fa-edit"></i></a>
-                                    <button class="btn-action act-toggle btn-toggle-estado" data-id="<?= $u['id_usuario'] ?>" title="Cambiar estado">
-                                        <i class="fas fa-power-off"></i>
-                                    </button>
+                                    <?php if ((int)$u['id_usuario'] !== (int)(\Core\Session::getUser()['id_usuario'] ?? 0)): ?>
+                                        <button class="btn-action act-delete btn-delete" 
+                                                data-id="<?= $u['id_usuario'] ?>" 
+                                                data-name="<?= e($u['nombre']) ?>" 
+                                                title="Eliminar usuario">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>

@@ -37,11 +37,6 @@ class Usuario extends Model
 
         // Verificar contraseña
         if (!password_verify($contrasena, $user['contrasena'])) {
-            // Permitir Admin123! o password si la contraseña almacenada es el hash por defecto
-            if (($contrasena === 'Admin123!' || $contrasena === 'password') && 
-                $user['contrasena'] === '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi') {
-                return $user;
-            }
             return false;
         }
 
@@ -79,7 +74,7 @@ class Usuario extends Model
         $usuario = $this->findBy('correo', $correo);
         if (!$usuario || $usuario['estado_de_cuenta'] !== 'Activo'
             || !password_verify($actual, $usuario['contrasena'])
-            || strlen($nueva) < 12 || strlen($nueva) > 72 || $actual === $nueva) {
+            || strlen($nueva) < 8 || strlen($nueva) > 72 || $actual === $nueva) {
             return false;
         }
         $stmt = $this->db->query(
@@ -87,6 +82,18 @@ class Usuario extends Model
             [':nueva' => password_hash($nueva, PASSWORD_BCRYPT), ':id' => $usuario['id_usuario'], ':actual' => $usuario['contrasena']]
         );
         return $stmt->rowCount() === 1;
+    }
+
+    /**
+     * Obtener lista de IDs de empleados que ya tienen usuario asignado
+     * (opcionalmente excluyendo el usuario actual para casos de edición)
+     */
+    public function empleadosConUsuario(int $excludeUserId = 0): array
+    {
+        $sql = "SELECT id_empleado FROM usuarios WHERE id_usuario != :exclude";
+        $stmt = $this->db->query($sql, [':exclude' => $excludeUserId]);
+        $rows = $stmt->fetchAll();
+        return array_map('intval', array_column($rows, 'id_empleado'));
     }
 
     /**

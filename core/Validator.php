@@ -50,10 +50,11 @@ class Validator
                     'date'      => $this->validateDate($field, $value, $fieldLabel),
                     'in'        => $this->validateIn($field, $value, $fieldLabel, $params),
                     'unique'    => $this->validateUnique($field, $value, $fieldLabel, $params[0], $params[1] ?? null),
-                    'phone'     => $this->validatePhone($field, $value, $fieldLabel),
-                    'dui'       => $this->validateDui($field, $value, $fieldLabel),
-                    'matricula' => $this->validateMatricula($field, $value, $fieldLabel),
-                    default     => null,
+                    'phone'       => $this->validatePhone($field, $value, $fieldLabel),
+                    'dui'         => $this->validateDui($field, $value, $fieldLabel),
+                    'matricula'   => $this->validateMatricula($field, $value, $fieldLabel),
+                    'person_name' => $this->validatePersonName($field, $value, $fieldLabel),
+                    default       => null,
                 };
             }
         }
@@ -192,12 +193,29 @@ class Validator
     }
 
     /**
-     * Formato de teléfono salvadoreño (8 dígitos con guion: 0000-0000)
+     * Formato de teléfono salvadoreño o internacional (rechaza números ficticios como 0000-0000)
      */
     private function validatePhone(string $field, mixed $value, string $label): void
     {
-        if ($value !== null && $value !== '' && !preg_match('/^\d{4}-\d{4}$/', (string) $value)) {
-            $this->errors[$field] = "El campo {$label} debe tener formato válido con guion (0000-0000).";
+        if ($value !== null && $value !== '') {
+            $str = trim((string) $value);
+            $digits = preg_replace('/\D/', '', $str);
+
+            // Rechazar secuencias de números ficticios repetidos (ej. 0000-0000, 1111-1111, etc.)
+            if (preg_match('/^(\d)\1{7,}$/', $digits)) {
+                $this->errors[$field] = "El campo {$label} no puede ser un número ficticio (ej. 0000-0000).";
+                return;
+            }
+
+            // Validar prefijo salvadoreño (2, 6, 7 o 8) o formato internacional
+            $svDigits = str_starts_with($digits, '503') ? substr($digits, 3) : $digits;
+            if (strlen($svDigits) === 8 && preg_match('/^[2678]\d{7}$/', $svDigits)) {
+                return;
+            }
+
+            if (!preg_match('/^\+?\d{8,15}$/', $digits)) {
+                $this->errors[$field] = "El campo {$label} debe ser un número real válido (ej. 7000-0000 o 2200-0000).";
+            }
         }
     }
 
@@ -218,6 +236,23 @@ class Validator
     {
         if ($value !== null && $value !== '' && !preg_match('/^\d{8}$/', (string) $value)) {
             $this->errors[$field] = "El campo {$label} debe contener exactamente 8 números.";
+        }
+    }
+
+    /**
+     * Nombre de persona (solo letras, espacios, acentos y signos de nombre válidos; rechaza números y caracteres especiales)
+     */
+    private function validatePersonName(string $field, mixed $value, string $label): void
+    {
+        if ($value !== null && $value !== '') {
+            $str = trim((string) $value);
+            if (preg_match('/[0-9]/', $str)) {
+                $this->errors[$field] = "El campo {$label} no debe contener números.";
+                return;
+            }
+            if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s\.\'\-]+$/u', $str)) {
+                $this->errors[$field] = "El campo {$label} solo debe contener letras y espacios (sin símbolos especiales).";
+            }
         }
     }
 
@@ -253,6 +288,8 @@ class Validator
             'area'                => 'Área',
             'id_cliente'          => 'Cliente',
             'id_inmueble'         => 'Inmueble',
+            'id_empleado'         => 'Empleado',
+            'correo'              => 'Correo Electrónico',
             'nombre_del_proyecto' => 'Nombre del Proyecto',
             'fecha_de_inicio'     => 'Fecha de Inicio',
             'presupuesto_inicial' => 'Presupuesto Inicial',

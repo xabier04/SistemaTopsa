@@ -12,6 +12,24 @@ class Proyecto extends Model
     protected string $table = 'proyectos';
     protected string $primaryKey = 'id_proyecto';
 
+    public function actualizarConPagos(int $id, array $data): void
+    {
+        $this->db->beginTransaction();
+        try {
+            $actual = $this->db->query('SELECT * FROM proyectos WHERE id_proyecto = ? FOR UPDATE', [$id])->fetch();
+            if (!$actual) throw new \DomainException('Proyecto no encontrado.');
+            $pagado = $this->db->query('SELECT COALESCE(SUM(monto_abonado), 0) FROM transacciones WHERE id_proyecto = ?', [$id])->fetchColumn();
+            if ((int) round((float) $data['presupuesto_inicial'] * 100) < (int) round((float) $pagado * 100)) {
+                throw new \DomainException('El presupuesto no puede ser menor que los pagos registrados.');
+            }
+            if ((float) $pagado > 0 && (int) $data['id_cliente'] !== (int) $actual['id_cliente']) {
+                throw new \DomainException('No se puede cambiar el cliente de un proyecto con pagos registrados.');
+            }
+            $this->update($id, $data);
+            $this->db->commit();
+        } catch (\Throwable $e) { $this->db->rollBack(); throw $e; }
+    }
+
     /**
      * Obtener todos los proyectos con datos de cliente e inmueble
      */

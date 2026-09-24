@@ -159,6 +159,6 @@ abstract class Controller
      */
     public function getRequiredRole(string $action): ?string
     {
-        return null;
+        return 'Administrador';
     }
 }

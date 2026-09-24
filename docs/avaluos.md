@@ -56,6 +56,12 @@ Entrar en **Avalúos → Nueva valuación**, o **Proyecto → Crear avalúo** pa
 
 Después de guardar se pueden adjuntar imágenes y PDF (máximo 10 MB, sujeto a los límites PHP del servidor). **Ver informe / Guardar PDF** permite imprimir o usar Guardar como PDF del navegador. Las imágenes se incluyen; los anexos PDF se mantienen separados, no se fusionan ni se copia la firma del documento de referencia.
 
+El informe incorpora el logo de TOPSA, portada institucional, valor adoptado destacado, tablas con encabezados repetidos y espacio para la firma. Para guardar PDF, seleccionar A4 y desactivar los encabezados y pies del navegador. La numeración de páginas utiliza las cajas de margen de CSS en navegadores compatibles (Chrome/Edge recientes).
+
+La presentación toma como referencia visual `VALUO COMPLETO.pdf`: portada dirigida al destinatario con propósito, matrícula, propietarios y perito; secciones I–IV para datos generales, entorno, terreno y construcción; V para costo; VI para mercado y homologación; VII para conclusión; y VIII para anexos, cuando existen. El cuadro de mercado incluye el sujeto junto a los tres comparables. El dictamen distingue costo, mercado, valor adoptado y valor del derecho. Los anexos se enumeran y las imágenes se presentan en hojas independientes. Solo se utilizan datos e imágenes del expediente actual; no se incorporan identidades, contactos, firmas ni afirmaciones normativas del ejemplo.
+
+**Exportar a Excel**, disponible en el expediente y en el informe, descarga un `.xlsx` con cuatro hojas: Resumen, Expediente, Costo y Mercado. Contiene datos y resultados de la revisión guardada, importes y medidas numéricos, y nombres/descripciones de anexos. Es una instantánea documental: no contiene fórmulas para recalcular al editar ni los archivos adjuntos incrustados. Las matrículas y demás identificadores se conservan como texto, incluso con ceros iniciales. Requiere las extensiones PHP ZIP y mbstring. No necesita Composer ni cambios de base de datos.
+
 ## Base de datos
 
 Ejecutar `php database/migrate_avaluos.php`. La migración es aditiva e idempotente para el esquema local inspeccionado, que no tenía tablas de avalúos. Las nuevas instalaciones también las reciben mediante `database/schema.sql`.
@@ -69,6 +75,7 @@ El guardado de cabecera y expediente es transaccional. Una revisión antigua se 
 ## Verificación
 
 - `php tests/valuo_calculo_test.php`: conciliación con valores cacheados del Excel, encadenamiento, múltiples componentes, terreno sin construcción, nulos y datos inválidos.
+- `php tests/valuo_excel_test.php`: integridad del XLSX/XML, texto seguro, identificadores, valores numéricos y pendientes para terreno sin construcción. El test HTTP verifica además la descarga y su conciliación con la revisión guardada.
 - `php tests/valuo_persistence_test.php`: alta, lectura, edición, precisión, conflicto concurrente, rollback y escape HTML del reporte. Requiere un proyecto local; elimina únicamente el registro temporal que crea.
 - `python tests/valuo_http_test.py`: flujo HTTP local completo, CSRF, estados, persistencia de campos tras un error, edición concurrente, subida/lectura de imagen y reporte. Usa biblioteca estándar; crea y limpia sus propios datos. La URL local está definida al inicio del archivo.
 

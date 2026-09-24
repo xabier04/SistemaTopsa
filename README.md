@@ -1,4 +1,8 @@
 # 📐 Sistema de Gestión — TOPSA (Topografía y Servicios Anexos)
 
-**Sistema final**
-aqui subir la version final
+**Sistema Topsa**
+Sprint 2
+-validaciones de telefonos
+-que no se borren todos los campos
+
+Sprint 3 unido
