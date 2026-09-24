@@ -12,6 +12,7 @@
 
     <form action="<?= $action ?>" method="POST">
         <?= csrf_field() ?>
+        <input type="hidden" name="referencia" value="<?= e($_SESSION['pago_referencia']) ?>">
 
         <div class="form-card-body">
             <div class="form-group">

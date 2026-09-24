@@ -51,6 +51,10 @@ const App = {
      * POST request con FormData
      */
     async post(url, formData) {
+        const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
+        if (csrf && formData instanceof FormData && !formData.has('_csrf_token')) {
+            formData.append('_csrf_token', csrf);
+        }
         return this.fetch(url, {
             method: 'POST',
             body: formData,

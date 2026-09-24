@@ -22,7 +22,7 @@ class Router
         $url = $this->parseUrl();
 
         if (empty($url)) {
-            // Sin login — ir directo al dashboard
+            // El dashboard aplica autenticación antes de mostrar información.
             $controllerName = 'DashboardController';
             $action = 'index';
         } else {
@@ -48,20 +48,39 @@ class Router
             return;
         }
 
-        // Verificar autenticación (DESACTIVADO para sprint backlog)
-        // if ($controllerName !== 'AuthController') {
-        //     if (!Session::isAuthenticated()) {
-        //         $this->redirect('auth/login');
-        //         return;
-        //     }
-        //     if (method_exists($controller, 'getRequiredRole')) {
-        //         $requiredRole = $controller->getRequiredRole($action);
-        //         if ($requiredRole && !Session::hasRole($requiredRole)) {
-        //             $this->handleError(403, "No tienes permisos para acceder a esta sección");
-        //             return;
-        //         }
-        //     }
-        // }
+        $method = new \ReflectionMethod($controller, $action);
+        if (!$method->isPublic() || $method->getDeclaringClass()->getName() !== $controllerClass
+            || str_starts_with($action, '__') || $action === 'getRequiredRole') {
+            $this->handleError(404, 'Acción no encontrada');
+        }
+        if ($controllerName === 'AuthController') {
+            if (!in_array($action, ['login', 'authenticate', 'logout', 'recuperar', 'solicitarRecuperacion'], true)) {
+                $this->handleError(404, 'Acción no encontrada');
+            }
+        } else {
+            if (!Session::isAuthenticated()) {
+                if (self::isAjax()) $this->handleError(401, 'Inicie sesión para continuar');
+                $this->redirect('auth/login');
+            }
+            $user = (new \App\Models\Usuario())->find((int) Session::getUser()['id_usuario']);
+            if (!$user || $user['estado_de_cuenta'] !== 'Activo'
+                || !hash_equals($_SESSION['password_fingerprint'] ?? '', hash('sha256', $user['contrasena']))) {
+                Session::logout();
+                $this->redirect('auth/login');
+            }
+            $_SESSION['user']['rol'] = $user['rol'];
+            $_SESSION['user']['id_empleado'] = $user['id_empleado'];
+            $_SESSION['user']['correo'] = $user['correo'];
+            $_SESSION['user']['nombre'] = $user['nombre'];
+            if (!empty($user['requiere_cambio_contrasena'])
+                && !($controllerName === 'UsuarioController' && in_array($action, ['cambiarClave', 'guardarClave'], true))) {
+                $this->redirect('usuario/cambiarClave');
+            }
+            $requiredRole = $controller->getRequiredRole($action);
+            if ($requiredRole && !Session::hasRole($requiredRole)) {
+                $this->handleError(403, 'No tiene permisos para acceder a esta sección');
+            }
+        }
 
         // Ejecutar la acción del controlador
         call_user_func_array([$controller, $action], $params);

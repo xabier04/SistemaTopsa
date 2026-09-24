@@ -104,6 +104,7 @@
                         </div>
                         <?php $dotClass = ($emp['estado'] === 'Activo') ? 'dot-success' : 'dot-danger'; ?>
                         <span class="badge-dot <?= $dotClass ?>"><?= e($emp['estado']) ?></span>
+                        <form method="post" action="<?= url('proyecto/desasignarEmpleado') ?>"><?= csrf_field() ?><input type="hidden" name="id_proyecto" value="<?= $proyecto['id_proyecto'] ?>"><input type="hidden" name="id_empleado" value="<?= $emp['id_empleado'] ?>"><button type="submit" class="btn btn-sm btn-outline">Quitar del equipo</button></form>
                     </li>
                 <?php endforeach; ?>
             </ul>
@@ -116,3 +117,14 @@
         <?php endif; ?>
     </div>
 </div>
+
+<div class="card mt-6"><div class="card-header"><h3>Asignar personal al proyecto</h3></div><div class="card-body">
+<?php if ($proyecto['estado_del_proyecto'] !== 'Finalizado'): ?>
+<form method="post" action="<?= url('proyecto/asignarEmpleado') ?>">
+<?= csrf_field() ?><input type="hidden" name="id_proyecto" value="<?= $proyecto['id_proyecto'] ?>">
+<div class="form-group"><label for="empleadoAsignar">Empleado activo</label><select class="form-control" id="empleadoAsignar" name="id_empleado" required><option value="">Seleccione un empleado</option>
+<?php foreach ($disponibles as $d): if (in_array($d['id_empleado'], array_column($empleados, 'id_empleado'))) continue; ?><option value="<?= $d['id_empleado'] ?>"><?= e($d['nombre_completo']) ?></option><?php endforeach; ?>
+</select></div><button class="btn btn-primary" type="submit">Asignar empleado</button>
+</form>
+<?php else: ?><p>Este proyecto está finalizado.</p><?php endif; ?>
+<p><a href="<?= url('tarea/index') ?>">Asignar tareas y consultar avances del equipo</a></p></div></div>

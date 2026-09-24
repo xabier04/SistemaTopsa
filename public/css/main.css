@@ -399,6 +399,9 @@ img {
 }
 
 .btn-logout {
+    border: 0;
+    background: transparent;
+    cursor: pointer;
     color: rgba(255,255,255,0.5);
     width: 34px;
     height: 34px;
@@ -418,6 +421,7 @@ img {
 /* ─── Main Content ────────────────────────────────────────── */
 .main-content {
     flex: 1;
+    min-width: 0;
     margin-left: var(--sidebar-width);
     min-height: 100vh;
     display: flex;
@@ -1801,4 +1805,3 @@ span.flatpickr-weekday {
     background: var(--primary-100);
     color: var(--primary-700);
 }
-

@@ -53,7 +53,12 @@ class AuthController extends Controller
         }
 
         $correo = $this->input('correo', '');
-        $contrasena = $this->input('contrasena', '');
+        $contrasena = (string) ($_POST['contrasena'] ?? '');
+        if (($_SESSION['login_blocked_until'] ?? 0) > time()) {
+            Session::flash('error', 'Espere unos minutos antes de volver a intentar.');
+            $this->redirect('auth/login');
+            return;
+        }
 
         // Validar campos vacíos
         if (empty($correo) || empty($contrasena)) {
@@ -66,12 +71,18 @@ class AuthController extends Controller
         $user = $this->usuarioModel->authenticate($correo, $contrasena);
 
         if (!$user) {
+            $_SESSION['login_failures'] = ($_SESSION['login_failures'] ?? 0) + 1;
+            if ($_SESSION['login_failures'] >= 5) {
+                $_SESSION['login_blocked_until'] = time() + 300;
+                $_SESSION['login_failures'] = 0;
+            }
             Session::flash('error', 'Credenciales incorrectas o cuenta inactiva.');
             $this->redirect('auth/login');
             return;
         }
 
         // Iniciar sesión
+        unset($_SESSION['login_failures'], $_SESSION['login_blocked_until']);
         Session::login($user);
 
         // Registrar en bitácora
@@ -86,11 +97,38 @@ class AuthController extends Controller
      */
     public function logout(): void
     {
+        if (!$this->isPost() || !$this->validateCsrf()) {
+            $this->redirect('auth/login');
+            return;
+        }
         if (Session::isAuthenticated()) {
             $this->logActivity('Cierre de sesión', 'usuarios', Session::getUser()['id_usuario']);
         }
 
         Session::logout();
         $this->redirect('auth/login');
+    }
+
+    public function recuperar(): void
+    {
+        $this->view('auth/recuperar', [], 'auth');
+    }
+
+    public function solicitarRecuperacion(): void
+    {
+        if (!$this->isPost() || !$this->validateCsrf()) {
+            $this->redirect('auth/recuperar');
+            return;
+        }
+        $correo = $this->input('correo', '');
+        if (filter_var($correo, FILTER_VALIDATE_EMAIL) && ($_SESSION['recovery_next'] ?? 0) <= time()) {
+            $user = $this->usuarioModel->findBy('correo', $correo);
+            if ($user && $user['estado_de_cuenta'] === 'Activo') {
+                \Core\Database::getInstance()->query('INSERT IGNORE INTO recuperaciones (id_usuario) VALUES (?)', [$user['id_usuario']]);
+            }
+            $_SESSION['recovery_next'] = time() + 60;
+        }
+        Session::flash('success', 'Si la cuenta está activa, el administrador recibirá su solicitud. Contáctelo para verificar su identidad y obtener una clave temporal.');
+        $this->redirect('auth/recuperar');
     }
 }

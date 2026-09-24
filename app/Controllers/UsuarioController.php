@@ -33,6 +33,7 @@ class UsuarioController extends Controller
             'pageTitle'  => 'Gestión de Usuarios',
             'pageScript' => 'usuarios',
             'usuarios'   => $usuarios,
+            'recuperaciones' => \Core\Database::getInstance()->query('SELECT r.*, u.nombre, u.correo FROM recuperaciones r JOIN usuarios u ON u.id_usuario = r.id_usuario ORDER BY r.solicitada_en')->fetchAll(),
         ]);
     }
 
@@ -184,6 +185,7 @@ class UsuarioController extends Controller
             'contrasena' => password_hash($temporal, PASSWORD_BCRYPT),
             'requiere_cambio_contrasena' => 1,
         ]);
+        \Core\Database::getInstance()->query('DELETE FROM recuperaciones WHERE id_usuario = ?', [$id]);
         $this->rememberCredential($id, $temporal);
         $this->logActivity('Generó una nueva contraseña temporal', 'usuarios', $id);
         $this->redirect("usuario/credenciales/{$id}");
@@ -202,7 +204,7 @@ class UsuarioController extends Controller
             return;
         }
         // Nunca conservar contraseñas en el estado del formulario ni en bitácora.
-        $correo = trim((string) ($_POST['correo'] ?? ''));
+        $correo = Session::getUser()['correo'];
         $actual = (string) ($_POST['actual'] ?? '');
         $nueva = (string) ($_POST['nueva'] ?? '');
         $confirmacion = (string) ($_POST['confirmacion'] ?? '');
@@ -220,6 +222,7 @@ class UsuarioController extends Controller
             \Core\FormState::save(url('usuario/guardarClave'), ['correo' => $correo], $errors);
             Session::flash('error', reset($errors));
         } else {
+            $_SESSION['password_fingerprint'] = hash('sha256', $this->model->find((int) Session::getUser()['id_usuario'])['contrasena']);
             unset($_SESSION['credential']);
             Session::flash('success', 'Contraseña cambiada correctamente. Ya puede descartar la contraseña anterior.');
         }

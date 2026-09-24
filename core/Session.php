@@ -56,6 +56,7 @@ class Session
             'estado_de_cuenta' => $user['estado_de_cuenta'],
         ];
 
+        $_SESSION['password_fingerprint'] = hash('sha256', $user['contrasena']);
         $_SESSION['login_time'] = time();
         $_SESSION['ip_address'] = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
     }
@@ -98,14 +99,7 @@ class Session
      */
     public static function getUser(): ?array
     {
-        return $_SESSION['user'] ?? [
-            'id_usuario'       => 1,
-            'id_empleado'      => 1,
-            'nombre'           => 'Administrador',
-            'correo'           => 'admin@topsa.com',
-            'rol'              => 'Administrador',
-            'estado_de_cuenta' => 'Activo',
-        ];
+        return $_SESSION['user'] ?? null;
     }
 
     /**

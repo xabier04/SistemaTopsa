@@ -11,7 +11,7 @@ $formErrors = $formState['errors'] ?? [];
             <?php require dirname(__DIR__) . '/partials/form_errors.php'; ?>
             <div class="form-group">
                 <label for="correo">Correo de la cuenta</label>
-                <input class="form-control" id="correo" type="email" name="correo" value="<?= e($formState['values']['correo'] ?? '') ?>" required autocomplete="username">
+                <input class="form-control" id="correo" type="email" name="correo" value="<?= e($currentUser['correo']) ?>" readonly autocomplete="username">
             </div>
             <div class="form-group">
                 <label for="actual">Contraseña actual o temporal</label>

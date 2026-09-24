@@ -97,6 +97,7 @@
                 </button>
             </form>
 
+            <p><a href="<?= url('auth/recuperar') ?>">¿Olvidó su contraseña?</a></p>
             <div class="login-footer">
                 <p>&copy; <?= date('Y') ?> TOPSA — Topografía y Servicios Anexos</p>
             </div>

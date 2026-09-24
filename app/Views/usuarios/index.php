@@ -1,3 +1,13 @@
+<?php if (!empty($recuperaciones)): ?>
+<div class="card"><div class="card-header"><h3>Solicitudes de recuperación</h3></div><div class="card-body">
+<p>Verifique la identidad del usuario antes de generar y entregarle una contraseña temporal.</p>
+<?php foreach ($recuperaciones as $r): ?>
+<form method="post" action="<?= url('usuario/regenerar/' . $r['id_usuario']) ?>" class="form-group">
+<?= csrf_field() ?><strong><?= e($r['nombre']) ?></strong> · <?= e($r['correo']) ?> · <?= e($r['solicitada_en']) ?>
+<button class="btn btn-primary" type="submit">Generar clave temporal</button>
+</form>
+<?php endforeach; ?></div></div>
+<?php endif; ?>
 <?php /** Vista: Gestión de Usuarios */ ?>
 
 <div class="page-header">

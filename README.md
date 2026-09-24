@@ -4,3 +4,5 @@
 Sprint 2
 -validaciones de telefonos
 -que no se borren todos los campos
+
+Sprint 3 unido

@@ -12,8 +12,14 @@ use App\Models\Inmueble;
  */
 class DashboardController extends Controller
 {
+    public function getRequiredRole(string $action): ?string { return null; }
+
     public function index(): void
     {
+        if (!\Core\Session::isAdmin()) {
+            $this->redirect('tarea/index');
+            return;
+        }
         $proyectoModel  = new Proyecto();
         $clienteModel   = new Cliente();
         $inmuebleModel  = new Inmueble();

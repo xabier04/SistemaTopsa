@@ -11,7 +11,7 @@ $groups = ['I. Datos generales' => $general, 'II. Entorno del inmueble' => $envi
     'III. Descripción del terreno' => $land, 'IV. Descripción de la construcción' => ValuoFormulario::GENERALES['Descripción de la construcción']];
 ?>
 <!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Avalúo <?= e($d['referencia']) ?></title><link rel="stylesheet" href="<?= asset('css/valuo-report.css') ?>"></head><body>
+<title>Valúo <?= e($d['referencia']) ?></title><link rel="stylesheet" href="<?= asset('css/valuo-report.css') ?>"></head><body>
 <nav class="report-tools"><button type="button" data-print-report>Imprimir / Guardar PDF</button><a href="<?= url('valuo/excel/' . $v['id_valuo']) ?>">Exportar a Excel</a><a href="<?= url('valuo/show/' . $v['id_valuo']) ?>">Volver al expediente</a><p>Seleccione tamaño A4 y desactive los encabezados y pies del navegador. Las imágenes se incluyen en el informe; los anexos PDF se consultan por separado.</p></nav>
 <main>
 <header class="report-cover">

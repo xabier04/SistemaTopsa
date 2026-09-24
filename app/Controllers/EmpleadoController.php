@@ -22,10 +22,7 @@ class EmpleadoController extends Controller
 
     public function getRequiredRole(string $action): ?string
     {
-        if (in_array($action, ['create', 'store', 'edit', 'update', 'delete'])) {
-            return 'Administrador';
-        }
-        return null;
+        return 'Administrador';
     }
 
     public function index(): void
