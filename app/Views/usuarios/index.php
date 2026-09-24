@@ -65,9 +65,14 @@
                             <td>
                                 <div class="table-actions">
                                     <a href="<?= url("usuario/edit/{$u['id_usuario']}") ?>" class="btn-action act-edit" title="Editar"><i class="fas fa-edit"></i></a>
-                                    <button class="btn-action act-toggle btn-toggle-estado" data-id="<?= $u['id_usuario'] ?>" title="Cambiar estado">
-                                        <i class="fas fa-power-off"></i>
-                                    </button>
+                                    <?php if ((int)$u['id_usuario'] !== (int)(\Core\Session::getUser()['id_usuario'] ?? 0)): ?>
+                                        <button class="btn-action act-delete btn-delete" 
+                                                data-id="<?= $u['id_usuario'] ?>" 
+                                                data-name="<?= e($u['nombre']) ?>" 
+                                                title="Eliminar usuario">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>

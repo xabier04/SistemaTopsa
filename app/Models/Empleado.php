@@ -43,4 +43,22 @@ class Empleado extends Model
                 ORDER BY nombre_completo ASC";
         return $this->db->query($sql, [':term' => "%{$term}%"])->fetchAll();
     }
+
+    /**
+     * Catálogo de cargos oficiales autorizados en la empresa
+     */
+    public static function getCargosOficiales(): array
+    {
+        return [
+            'Administrador General',
+            'Ingeniero Topógrafo / Civil',
+            'Perito Valuador',
+            'Topógrafo',
+            'Cadenero / Auxiliar de Topografía',
+            'Dibujante CAD / Diseñador',
+            'Jefe de Cuadrilla',
+            'Supervisor de Obra',
+            'Asistente Administrativo',
+        ];
+    }
 }

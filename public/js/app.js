@@ -48,9 +48,22 @@ const App = {
     },
 
     /**
+     * Obtener el token CSRF activo del documento
+     */
+    getCsrfToken() {
+        return document.querySelector('meta[name="csrf-token"]')?.content
+            || document.querySelector('input[name="_csrf_token"]')?.value
+            || '';
+    },
+
+    /**
      * POST request con FormData
      */
     async post(url, formData) {
+        if (formData instanceof FormData && !formData.has('_csrf_token')) {
+            const csrf = this.getCsrfToken();
+            if (csrf) formData.append('_csrf_token', csrf);
+        }
         return this.fetch(url, {
             method: 'POST',
             body: formData,
@@ -105,9 +118,9 @@ const Toast = {
     },
 
     success(msg) { this.show(msg, 'success'); },
-    error(msg)   { this.show(msg, 'error'); },
+    error(msg) { this.show(msg, 'error'); },
     warning(msg) { this.show(msg, 'warning'); },
-    info(msg)    { this.show(msg, 'info'); },
+    info(msg) { this.show(msg, 'info'); },
 };
 
 // ─── Modal Manager ──────────────────────────────────────────
@@ -223,12 +236,64 @@ document.addEventListener('DOMContentLoaded', () => {
 // ─── Input Masks & Interactive Validations ──────────────────
 const FormInteractivity = {
     init() {
+        this.initNameValidation();
         this.initDuiMask();
         this.initPhoneMask();
         this.initMatriculaMask();
         this.initEmailValidation();
         this.initDatepickers();
         this.initFormSubmissions();
+    },
+
+    /**
+     * Validación interactiva para nombres completos (impide números y caracteres especiales)
+     */
+    initNameValidation() {
+        const inputs = document.querySelectorAll('input[data-validate="name"], #nombre_completo');
+        inputs.forEach(input => {
+            const hint = document.getElementById('nombreHint') || input.parentElement.querySelector('.field-hint');
+
+            const updateName = () => {
+                const val = input.value;
+                const hasNumbers = /[0-9]/.test(val);
+                const hasInvalidSymbols = /[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s\.\'\-]/.test(val);
+
+                if (hasNumbers || hasInvalidSymbols) {
+                    input.classList.add('is-invalid');
+                    input.classList.remove('is-valid');
+                    if (hint) {
+                        const err = hasNumbers ? 'No se permiten números en el nombre' : 'No se permiten símbolos especiales';
+                        hint.innerHTML = `<i class="fas fa-exclamation-circle" style="color: #dc2626;"></i> ${err}`;
+                        hint.style.color = '#dc2626';
+                    }
+                } else if (val.trim().length >= 3) {
+                    input.classList.add('is-valid');
+                    input.classList.remove('is-invalid');
+                    if (hint) {
+                        hint.innerHTML = '<i class="fas fa-check-circle" style="color: #166534;"></i> Nombre válido';
+                        hint.style.color = '#166534';
+                    }
+                } else {
+                    input.classList.remove('is-valid', 'is-invalid');
+                    if (hint) {
+                        hint.innerHTML = '<i class="fas fa-info-circle"></i> Solo letras y espacios (sin números ni símbolos)';
+                        hint.style.color = '';
+                    }
+                }
+            };
+
+            input.addEventListener('keydown', (e) => {
+                if (/[0-9]/.test(e.key)) {
+                    e.preventDefault();
+                    if (typeof Toast !== 'undefined') {
+                        Toast.warning('No se permiten números en el nombre.');
+                    }
+                }
+            });
+
+            input.addEventListener('input', updateName);
+            if (input.value) updateName();
+        });
     },
 
     /**
@@ -280,7 +345,7 @@ const FormInteractivity = {
     },
 
     /**
-     * Máscara automática de teléfono: ####-####
+     * Máscara automática de teléfono con validación libphonenumber
      */
     initPhoneMask() {
         const inputs = document.querySelectorAll('input[data-mask="phone"], #telefono');
@@ -288,7 +353,8 @@ const FormInteractivity = {
             const hint = document.getElementById('telefonoHint') || input.parentElement.querySelector('.field-hint');
 
             const updatePhone = () => {
-                let digits = input.value.replace(/\D/g, '').slice(0, 8);
+                let rawVal = input.value;
+                let digits = rawVal.replace(/\D/g, '').slice(0, 8);
                 let formatted = digits;
 
                 if (digits.length > 4) {
@@ -297,25 +363,28 @@ const FormInteractivity = {
 
                 input.value = formatted;
 
-                // Validación visual interactiva
-                if (digits.length === 8) {
+                const isValidLib = (typeof libphonenumber !== 'undefined')
+                    ? libphonenumber.isValidPhoneNumber(input.value, 'SV')
+                    : (digits.length === 8);
+
+                if (isValidLib) {
                     input.classList.add('is-valid');
                     input.classList.remove('is-invalid');
                     if (hint) {
-                        hint.innerHTML = '<i class="fas fa-check-circle" style="color: #166534;"></i> Teléfono completo y válido';
+                        hint.innerHTML = '<i class="fas fa-check-circle" style="color: #166534;"></i> Teléfono verificado (libphonenumber)';
                         hint.style.color = '#166534';
                     }
                 } else if (digits.length > 0) {
                     input.classList.add('is-invalid');
                     input.classList.remove('is-valid');
                     if (hint) {
-                        hint.innerHTML = `<i class="fas fa-exclamation-circle" style="color: #dc2626;"></i> Ingrese 8 dígitos (${digits.length}/8)`;
+                        hint.innerHTML = `<i class="fas fa-exclamation-circle" style="color: #dc2626;"></i> Ingrese 8 dígitos válidos (${digits.length}/8)`;
                         hint.style.color = '#dc2626';
                     }
                 } else {
                     input.classList.remove('is-valid', 'is-invalid');
                     if (hint) {
-                        hint.innerHTML = '<i class="fas fa-magic"></i> Guion automático (0000-0000)';
+                        hint.innerHTML = '<i class="fas fa-phone-alt"></i> Guion automático (0000-0000) • Validación libphonenumber';
                         hint.style.color = '';
                     }
                 }
@@ -384,8 +453,8 @@ const FormInteractivity = {
     initEmailValidation() {
         const inputs = document.querySelectorAll('input[type="email"], input[data-validate="email"]');
         const fakeDomains = [
-            'test.com', 'example.com', 'fake.com', 'correo.com', 
-            'prueba.com', 'temporal.com', 'mailinator.com', 'demo.com', 
+            'test.com', 'example.com', 'fake.com', 'correo.com',
+            'prueba.com', 'temporal.com', 'mailinator.com', 'demo.com',
             'nada.com', 'test.test', 'email.com', 'temp.com'
         ];
 

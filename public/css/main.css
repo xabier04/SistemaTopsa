@@ -49,9 +49,9 @@
     --warning-bg:    #fffbeb;
     --warning-color: #b45309;
     --warning-border:#fde68a;
-    --info-bg:       #f0fdf4;
-    --info-color:    #15803d;
-    --info-border:   #bbf7d0;
+    --info-bg:       #eff6ff;
+    --info-color:    #1d4ed8;
+    --info-border:   #bfdbfe;
 
     /* Tipografía */
     --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -1379,12 +1379,12 @@ textarea.form-control {
 }
 
 .badge-dot.dot-info {
-    background: var(--info-bg);
-    color: var(--info-color);
+    background: #eff6ff !important;
+    color: #1d4ed8 !important;
 }
 
 .badge-dot.dot-info::before {
-    background: var(--info-color);
+    background: #2563eb !important;
 }
 
 .badge-dot.dot-neutral {

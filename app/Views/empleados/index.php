@@ -1,15 +1,32 @@
 <?php /** Vista: Listado de Empleados */ ?>
 <?php
     $totalActivos = 0;
+    $totalVacaciones = 0;
+    $totalIncapacitados = 0;
     $totalInactivos = 0;
     if (!empty($empleados)) {
         foreach ($empleados as $emp) {
-            if (($emp['estado'] ?? '') === 'Activo') $totalActivos++;
-            else $totalInactivos++;
+            match($emp['estado'] ?? '') {
+                'Activo'                  => $totalActivos++,
+                'Vacaciones', 'De Vacaciones' => $totalVacaciones++,
+                'Incapacitado'            => $totalIncapacitados++,
+                'Inactivo'                => $totalInactivos++,
+                default                   => $totalInactivos++,
+            };
         }
     }
     $isAdmin = (\Core\Session::getUser()['rol'] ?? '') === 'Administrador';
 ?>
+
+<style>
+.badge-dot.dot-info {
+    background: #eff6ff !important;
+    color: #1d4ed8 !important;
+}
+.badge-dot.dot-info::before {
+    background: #2563eb !important;
+}
+</style>
 
 <div class="page-header">
     <h2><i class="fas fa-users-cog"></i> Empleados</h2>
@@ -36,6 +53,24 @@
             <span class="chip-label">Activos</span>
         </div>
     </div>
+    <?php if ($totalVacaciones > 0): ?>
+    <div class="summary-chip">
+        <div class="chip-icon blue" style="background: rgba(37,99,235,0.1); color: #2563eb;"><i class="fas fa-umbrella-beach"></i></div>
+        <div class="chip-data">
+            <span class="chip-value"><?= $totalVacaciones ?></span>
+            <span class="chip-label">De Vacaciones</span>
+        </div>
+    </div>
+    <?php endif; ?>
+    <?php if ($totalIncapacitados > 0): ?>
+    <div class="summary-chip">
+        <div class="chip-icon amber" style="background: rgba(217,119,6,0.1); color: #d97706;"><i class="fas fa-user-nurse"></i></div>
+        <div class="chip-data">
+            <span class="chip-value"><?= $totalIncapacitados ?></span>
+            <span class="chip-label">Incapacitados</span>
+        </div>
+    </div>
+    <?php endif; ?>
     <div class="summary-chip">
         <div class="chip-icon red"><i class="fas fa-user-times"></i></div>
         <div class="chip-data">
@@ -93,12 +128,19 @@
                             </td>
                             <td>
                                 <?php
-                                    $dotClass = ($emp['estado'] === 'Activo') ? 'dot-success' : 'dot-danger';
+                                    $stNorm = mb_strtolower(trim($emp['estado'] ?? ''));
+                                    $dotClass = match($stNorm) {
+                                        'activo'                     => 'dot-success',
+                                        'vacaciones', 'de vacaciones'=> 'dot-info',
+                                        'incapacitado'               => 'dot-warning',
+                                        'inactivo'                   => 'dot-danger',
+                                        default                      => 'dot-secondary',
+                                    };
                                 ?>
                                 <span class="badge-dot <?= $dotClass ?>"><?= e($emp['estado']) ?></span>
                             </td>
                             <td>
-                                <span class="badge badge-info"><?= $emp['total_proyectos'] ?? 0 ?></span>
+                                <span class="badge badge-success"><?= $emp['total_proyectos'] ?? 0 ?></span>
                             </td>
                             <?php if ($isAdmin): ?>
                             <td>
