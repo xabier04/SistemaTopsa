@@ -47,9 +47,11 @@ class EmpleadoController extends Controller
     public function create(): void
     {
         $this->view('empleados/form', [
-            'pageTitle' => 'Nuevo Empleado',
-            'empleado'  => null,
-            'action'    => url('empleado/store'),
+            'pageTitle'  => 'Nuevo Empleado',
+            'pageScript' => 'empleados',
+            'empleado'   => null,
+            'cargos'     => Empleado::getCargosOficiales(),
+            'action'     => url('empleado/store'),
         ]);
     }
 
@@ -64,7 +66,7 @@ class EmpleadoController extends Controller
 
         $validator = new Validator($data);
         if (!$validator->validate([
-            'nombre_completo' => 'required|max:60',
+            'nombre_completo' => 'required|max:60|person_name',
             'dui'             => 'required|dui|unique:empleados',
             'cargo'           => 'required|max:90',
             'telefono'        => 'phone',
@@ -92,9 +94,11 @@ class EmpleadoController extends Controller
         }
 
         $this->view('empleados/form', [
-            'pageTitle' => 'Editar Empleado',
-            'empleado'  => $empleado,
-            'action'    => url("empleado/update/{$id}"),
+            'pageTitle'  => 'Editar Empleado',
+            'pageScript' => 'empleados',
+            'empleado'   => $empleado,
+            'cargos'     => Empleado::getCargosOficiales(),
+            'action'     => url("empleado/update/{$id}"),
         ]);
     }
 
@@ -109,11 +113,11 @@ class EmpleadoController extends Controller
 
         $validator = new Validator($data);
         if (!$validator->validate([
-            'nombre_completo' => 'required|max:60',
+            'nombre_completo' => 'required|max:60|person_name',
             'dui'             => "required|dui|unique:empleados,{$id}",
             'cargo'           => 'required|max:90',
             'telefono'        => 'phone',
-            'estado'          => 'required|in:Activo,Inactivo',
+            'estado'          => 'required|in:Activo,Vacaciones,De Vacaciones,Incapacitado,Inactivo',
         ])) {
             \Core\FormState::save(url("empleado/update/{$id}"), $data, $validator->getErrors());
             Session::flash('error', $validator->firstError());

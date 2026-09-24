@@ -11,7 +11,7 @@ return [
     // URL base detectada dinámicamente según el entorno y dominio de acceso
     'base_url' => (function () {
         if (php_sapi_name() === 'cli' || empty($_SERVER['HTTP_HOST'])) {
-            return 'http://sistematopsa.test';
+            return 'http://localhost/SistemaTopsa-sprint22/';
         }
         $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
             || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');

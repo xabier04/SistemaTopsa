@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="base-url" content="<?= url('') ?>">
+<<<<<<< HEAD
     <meta name="csrf-token" content="<?= e(csrf_token()) ?>">
+=======
+    <meta name="csrf-token" content="<?= csrf_token() ?>">
+>>>>>>> origin/kevin
     <meta name="description" content="Sistema de Gestión — Oficina de Topografía y Servicios Anexos TOPSA">
     <title><?= e($pageTitle ?? 'Panel Principal') ?> — <?= e($appName) ?></title>
     <link rel="icon" type="image/svg+xml" href="<?= asset('img/logo-icon.svg') ?>">
@@ -13,9 +17,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="<?= asset('css/flatpickr.min.css') ?>">
-    <link rel="stylesheet" href="<?= asset('css/main.css') ?>">
-    <link rel="stylesheet" href="<?= asset('css/dashboard.css') ?>">
-    <link rel="stylesheet" href="<?= asset('css/interactive.css') ?>">
+    <link rel="stylesheet" href="<?= asset('css/main.css') ?>?v=2.0">
+    <link rel="stylesheet" href="<?= asset('css/dashboard.css') ?>?v=2.0">
+    <link rel="stylesheet" href="<?= asset('css/interactive.css') ?>?v=2.0">
 </head>
 <body>
     <div class="app-layout">
@@ -146,6 +150,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- Scripts -->
+    <script src="<?= asset('js/libphonenumber-js.min.js') ?>"></script>
     <script src="<?= asset('js/flatpickr.min.js') ?>"></script>
     <script src="<?= asset('js/flatpickr-es.js') ?>"></script>
     <script src="<?= asset('js/app.js') ?>"></script>
